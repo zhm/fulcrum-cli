@@ -1,0 +1,27 @@
+{
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [ "." ],
+  "search.exclude": {
+    "**/.git": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/tmp": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "typescript.preferences.importModuleSpecifier": "shortest",
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "mochaExplorer.files": "test/**/*.ts",
+  "mochaExplorer.parallel": false,
+  "mochaExplorer.require": [
+    "ts-node/register"
+  ]
+}
