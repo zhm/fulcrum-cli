@@ -4,12 +4,12 @@
     "target": "es2020",
     "sourceMap": true,
     "outDir": "dist",
-    "strict": true,
+    "strict": false,
     "lib": ["esnext"],
     "module": "commonjs",
     "allowJs": true,
     "esModuleInterop": true,
     "noImplicitAny": false,
-    "declaration": true
+    "declaration": true,
   }
 }

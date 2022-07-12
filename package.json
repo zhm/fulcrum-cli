@@ -11,8 +11,10 @@
   },
   "author": "Fulcrum",
   "devDependencies": {
+    "@types/dotenv-defaults": "^2.0.1",
     "@types/jest": "^28.1.4",
     "@types/node": "^18.0.3",
+    "@types/request": "^2.48.8",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
@@ -27,6 +29,11 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "dotenv-defaults": "^5.0.2",
+    "lodash": "^4.17.21",
+    "mixmatch": "^0.0.3",
+    "request": "^2.88.2",
+    "uuid": "^8.3.2",
+    "yargs": "^17.5.1"
   }
 }
