@@ -2,7 +2,7 @@ import request from 'request';
 import Client from '../api/client';
 
 export const command = 'query';
-export const description = 'Test';
+export const description = 'Run query';
 export const builder = (yargs) => {
   yargs
     .option('sql', {
