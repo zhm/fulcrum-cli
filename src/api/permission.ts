@@ -18,8 +18,9 @@ export default class Permission extends Resource {
       path: `${this.collection()}?type=form_members&object_id=${formId}`,
     };
 
-    const body = await this.call(options);
-    return JSON.parse(body)[this.resourcesName];
+    const json = await this.call(options);
+
+    return json[this.resourcesName];
   }
 }
 

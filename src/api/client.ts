@@ -115,27 +115,28 @@ export default class Client {
       Accept: 'application/json',
     };
 
-    if (!options.qs) {
-      options.qs = {};
+    if (!options.params) {
+      options.params = {};
     }
 
     if (this.token) {
-      options.qs.token = this.token;
+      options.params.token = this.token;
     }
 
     return new Promise((resolve, reject) => {
-      this.request(options, (err, res, body) => {
-        if (err) {
-          console.error('Request Error', res.status, body);
+      this.request(options)
+        .then((response) => {
+          resolve(response.data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            console.error('Request Error', error.message, error.response.status, error.response.data);
+          } else {
+            console.error('Request Error', error.message);
+          }
 
-          err.res = res;
-          err.body = body;
-
-          return reject(err);
-        }
-
-        return resolve(body);
-      });
+          reject(error);
+        });
     });
   }
 

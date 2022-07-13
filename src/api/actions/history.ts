@@ -7,11 +7,11 @@ export default class History extends Mixin {
     const options = {
       method: 'GET',
       path: this.memberAction(id, 'history'),
-      qs: params,
+      params,
     };
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body)[this.resourcesName];
+    return json[this.resourcesName];
   }
 }

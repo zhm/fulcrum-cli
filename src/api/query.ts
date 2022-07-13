@@ -7,27 +7,25 @@ export default class Query extends Resource {
   async ast(params) {
     const options = {
       url: `${this.client.config.query_url}/api/v2/query`,
-      qs: {
+      params: {
         ...params, ast: true, format: 'json', token: this.client.token,
       },
     };
 
-    const body = await this.client.call(options);
+    const json = await this.client.call(options);
 
-    return JSON.parse(body);
+    return json;
   }
 
   async run(params) {
     const options = {
       url: `${this.client.config.query_url}/api/v2/query`,
-      qs: {
+      params: {
         ...params, arrays: 1, format: 'json', token: this.client.token,
       },
     };
 
-    const body = await this.client.call(options);
-
-    const parsed = JSON.parse(body);
+    const parsed = await this.client.call(options);
 
     const objects = [];
 

@@ -32,9 +32,9 @@ export default class Audio extends MediaResource {
 
     options.progress = progress;
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body)[this.resourceName];
+    return json[this.resourceName];
   }
 
   track(id, callback) {

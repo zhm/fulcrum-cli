@@ -22,9 +22,9 @@ export default class Form extends Resource {
       path: this.collectionAction('system_apps', null),
     };
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body);
+    return json;
   }
 }
 

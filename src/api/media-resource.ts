@@ -26,9 +26,9 @@ export default class MediaResource extends Resource {
 
     options.progress = progress;
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body)[this.resourceName];
+    return json[this.resourceName];
   }
 
   async downloadVersion(accessKey, version, callback) {

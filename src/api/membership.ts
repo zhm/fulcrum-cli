@@ -23,9 +23,9 @@ export default class Membership extends Resource {
       body: { change: changes },
     };
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body)[this.resourceName];
+    return json[this.resourceName];
   }
 }
 

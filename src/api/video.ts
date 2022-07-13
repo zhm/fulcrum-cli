@@ -32,9 +32,9 @@ export default class Video extends MediaResource {
 
     options.progress = progress;
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body)[this.resourceName];
+    return json[this.resourceName];
   }
 
   videoURL(id) {
@@ -50,9 +50,9 @@ export default class Video extends MediaResource {
   }
 
   async track(id) {
-    const body = await this.call({ path: this.trackURL(id, 'json') });
+    const json = await this.call({ path: this.trackURL(id, 'json') });
 
-    return JSON.parse(body);
+    return json;
   }
 
   trackURL(id, format) {

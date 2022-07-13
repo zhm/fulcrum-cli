@@ -1,5 +1,4 @@
-import request from 'request';
-import Client from '../api/client';
+import { createClient } from '../shared/api';
 
 export const command = 'query';
 export const description = 'Run query';
@@ -12,20 +11,6 @@ export const builder = (yargs) => {
       description: 'SQL query',
     })
     .strict(false);
-};
-
-const createClient = (endpoint, token) => {
-  const client = new Client({
-    base: `${endpoint}/api/v2`,
-    config: {
-      query_url: endpoint,
-    },
-    token,
-    request,
-    userAgent: 'Fulcrum CLI',
-  });
-
-  return client;
 };
 
 export const handler = async ({ endpoint, token, sql }) => {

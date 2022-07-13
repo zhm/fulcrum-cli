@@ -14,8 +14,8 @@ export default class Create extends Mixin {
       body: this.attributesForObject(object),
     };
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return JSON.parse(body)[this.resourceName];
+    return json[this.resourceName];
   }
 }

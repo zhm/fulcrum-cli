@@ -1,6 +1,4 @@
-import request from 'request';
-import { Form, Record } from 'fulcrum-core';
-import Client from '../api/client';
+import { createClient, fetchForm, fetchRecordsBySQL } from '../shared/api';
 
 export const command = 'update-calculations';
 export const description = 'Update calculation fields';
@@ -21,37 +19,16 @@ export const builder = (yargs) => {
     .strict(false);
 };
 
-const createClient = (endpoint, token) => {
-  const client = new Client({
-    base: `${endpoint}/api/v2`,
-    config: {
-      query_url: endpoint,
-    },
-    token,
-    request,
-    userAgent: 'Fulcrum CLI',
-  });
-
-  return client;
-};
-
 export const handler = async ({
   endpoint, token, sql, form: formID,
 }) => {
   const client = createClient(endpoint, token);
 
-  const form = new Form(await client.forms.find(formID));
+  const form = await fetchForm(client, formID);
 
-  const result = await client.query.run({ q: sql });
+  const records = await fetchRecordsBySQL(client, form, sql);
 
-  const ids = result.objects.map((o) => o._record_id ?? o.record_id ?? o.id);
-
-  const records = [];
-
-  for (const id of ids) {
-    records.push(new Record(await client.records.find(id), form));
-  }
-
-  console.log(JSON.stringify(records.map((o) => o.toJSON())));
+  console.log('RECORDS', records.length);
+  console.log(form.elementsOfType('CalculatedField').length);
   // console.log(JSON.stringify(results.objects));
 };

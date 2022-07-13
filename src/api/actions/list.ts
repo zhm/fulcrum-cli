@@ -14,11 +14,11 @@ export default class List extends Mixin {
     const options = {
       method: 'GET',
       path: this.collection(),
-      qs: params || this.defaultListParams,
+      params: params || this.defaultListParams,
     };
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return new Page(JSON.parse(body), this.resourcesName);
+    return new Page(json, this.resourcesName);
   }
 }

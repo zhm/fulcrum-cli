@@ -42,9 +42,9 @@ export default class Record extends Resource {
       body: params,
     };
 
-    const body = await this.call(options);
+    const json = await this.call(options);
 
-    return new Page(JSON.parse(body), this.resourcesName);
+    return new Page(json, this.resourcesName);
   }
 }
 
