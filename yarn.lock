@@ -2985,9 +2985,9 @@ lru-cache@^6.0.0:
     yallist "^4.0.0"
 
 lru-cache@^7.7.1:
-  version "7.12.0"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.12.0.tgz#be2649a992c8a9116efda5c487538dcf715f3476"
-  integrity sha512-OIP3DwzRZDfLg9B9VP/huWBlpvbkmbfiBy8xmsXp4RPmE4A3MhwNozc5ZJ3fWnSg8fDcdlE/neRTPG2ycEKliw==
+  version "7.13.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.13.0.tgz#c8178692969fb680cad948db4aad54066590a65a"
+  integrity sha512-SNFKDOORR41fkWP3DXiIUvXvfzDRPg3bxD1+29iRyP2ZW+Njp2o6zhx9YkEpq1tbP0AEDNW2VBUedzDIxmNhdg==
 
 make-dir@^3.0.0:
   version "3.1.0"
@@ -3189,9 +3189,9 @@ negotiator@^0.6.3:
   integrity sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==
 
 node-gyp@^9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-9.0.0.tgz#e1da2067427f3eb5bb56820cb62bc6b1e4bd2089"
-  integrity sha512-Ma6p4s+XCTPxCuAMrOA/IJRmVy16R8Sdhtwl4PrCr7IBlj4cPawF0vg/l7nOT1jPbuNS7lIRJpBSvVsXwEZuzw==
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-9.1.0.tgz#c8d8e590678ea1f7b8097511dedf41fc126648f8"
+  integrity sha512-HkmN0ZpQJU7FLbJauJTHkHlSVAXlNGDAzH/VYFZGDOnFyn/Na3GlNJfkudmufOdS6/jNFhy88ObzL7ERz9es1g==
   dependencies:
     env-paths "^2.2.0"
     glob "^7.1.4"
@@ -4083,9 +4083,9 @@ v8-compile-cache@^2.0.3:
   integrity sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==
 
 v8-sandbox@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/v8-sandbox/-/v8-sandbox-3.1.0.tgz#e091e8804759d49d22161649d6840b3d6a290d23"
-  integrity sha512-SW58QFghujVXA2tql/IAg41BIT2LGCBNL58FLMxWJBlG3nnDyFduwWl3+wFI+B03oE2rKhDcZ2uM72bU8capHg==
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/v8-sandbox/-/v8-sandbox-3.1.1.tgz#412005777255a5c6edbe4c09fcfe3f80e1182120"
+  integrity sha512-HX8LB7tvWlBvHHZmUXd0CpEjSIUIVWlXandiDqcUPulXs/coJbB2gktNxqNzAldzBfYi39ZBseF8mvnPb6xrDQ==
   dependencies:
     async "^3.2.0"
     axios "^0.27.2"

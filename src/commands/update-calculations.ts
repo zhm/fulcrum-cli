@@ -1,5 +1,6 @@
 import {
   createClient, fetchForm, fetchRecordsBySQL, updateCalculatedFields, fetchContext, saveRecords,
+  shutdownSandbox,
 } from '../shared/api';
 
 export const command = 'update-calculations';
@@ -37,4 +38,6 @@ export const handler = async ({
   }
 
   await saveRecords(client, form, records, 'Updating calculations');
+
+  await shutdownSandbox();
 };

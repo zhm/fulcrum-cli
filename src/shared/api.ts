@@ -7,7 +7,7 @@ import {
 } from 'fulcrum-core';
 import fs from 'fs';
 import path from 'path';
-import Sandbox from 'v8-sandbox';
+import { SandboxCluster } from 'v8-sandbox';
 import Client from '../api/client';
 import { red, green, blue } from './log';
 
@@ -35,6 +35,8 @@ export function createClient(endpoint: string, token: string) {
 }
 
 export async function fetchContext(client: Client): Promise<Context> {
+  console.log('fetching context');
+
   const json = await client.user.find();
 
   const user = new User(json);
@@ -52,10 +54,14 @@ export async function fetchContext(client: Client): Promise<Context> {
 }
 
 export async function fetchForm(client: Client, id: string) {
+  console.log('fetching form', id);
+
   return new Form(await client.forms.find(id));
 }
 
 export async function fetchRecordsBySQL(client: Client, form: Form, sql: string) {
+  console.log('fetching records by sql', sql);
+
   const result = await client.query.run({ q: sql });
 
   const ids = result.objects.map((o) => o._record_id ?? o.record_id ?? o.id);
@@ -66,6 +72,8 @@ export async function fetchRecordsBySQL(client: Client, form: Form, sql: string)
     const record = new Record(await client.records.find(id), form);
 
     if (record.projectID) {
+      console.log('fetching project', record.projectID);
+
       const project = await client.projects.find(record.projectID);
 
       record.project = project;
@@ -87,18 +95,25 @@ const SCRIPT = `
   setResult({ value: $$runtime.evaluate() });
 `;
 
-export async function updateCalculatedFields(record: Record, context: Context) {
-  let sandbox = null;
+let globalSandbox = null;
 
-  try {
-    sandbox = new Sandbox({ template: EXPRESSIONS });
-
-    await updateCalculatedFieldsRecursive(sandbox, record, record, record.formValues, context);
-  } finally {
-    if (sandbox) {
-      await sandbox.shutdown();
-    }
+function getSandbox() {
+  if (!globalSandbox) {
+    globalSandbox = new SandboxCluster({ workers: 2, template: EXPRESSIONS });
   }
+  return globalSandbox;
+}
+
+export async function shutdownSandbox() {
+  if (globalSandbox) {
+    await globalSandbox.shutdown();
+  }
+}
+
+export async function updateCalculatedFields(record: Record, context: Context) {
+  console.log('updating calculations for record', record.id);
+
+  await updateCalculatedFieldsRecursive(record, record, record.formValues, context);
 }
 
 function environmentFromEnvironmentVariables(): ExpressionEnvironment {
@@ -116,13 +131,13 @@ function environmentFromEnvironmentVariables(): ExpressionEnvironment {
   };
 }
 
-export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: Record, feature: Feature, formValues: FormValues, context: Context) {
+export async function updateCalculatedFieldsRecursive(record: Record, feature: Feature, formValues: FormValues, context: Context) {
   const runtimeVariables = getFeatureVariables(record, feature, formValues, context, environmentFromEnvironmentVariables());
 
-  const { value, error } = await sandbox.execute({
+  const { value, error } = await getSandbox().execute({
     code: SCRIPT,
     globals: { runtimeVariables },
-    timeout: 1000,
+    timeout: 2000,
   });
 
   for (const result of value) {
@@ -153,7 +168,7 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
 
         itemValues.merge(formValues);
 
-        await updateCalculatedFieldsRecursive(sandbox, record, item, itemValues, context);
+        await updateCalculatedFieldsRecursive(record, item, itemValues, context);
       }
     }
   }
@@ -312,6 +327,7 @@ export async function saveRecords(client: Client, form: Form, records: Record[],
 
   for (const batch of chunk(records, 5)) {
     console.log('syncing batch');
+
     await Promise.all(batch.map((record) => saveRecord(client, record, changeset)));
   }
 
