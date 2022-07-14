@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { chunk } from 'lodash';
 import {
   Form, Record, RepeatableItemValue,
   RepeatableValue, Feature, DateUtils,
@@ -297,6 +298,8 @@ export async function closeChangeset(client: Client, changeset: Changeset) {
 export async function saveRecord(client: Client, record: Record, changeset?: Changeset) {
   record.changeset = changeset;
 
+  console.log('syncing record', blue(record.id));
+
   const json = await client.records.create(record.toJSON());
 
   record.updateFromAPIAttributes(json);
@@ -307,10 +310,9 @@ export async function saveRecord(client: Client, record: Record, changeset?: Cha
 export async function saveRecords(client: Client, form: Form, records: Record[], comment?: string) {
   const changeset = await createChangeset(client, form, comment);
 
-  for (const record of records) {
-    console.log('syncing record', blue(record.id));
-
-    await saveRecord(client, record, changeset);
+  for (const batch of chunk(records, 5)) {
+    console.log('syncing batch');
+    await Promise.all(batch.map((record) => saveRecord(client, record, changeset)));
   }
 
   await closeChangeset(client, changeset);
