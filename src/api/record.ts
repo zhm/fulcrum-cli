@@ -18,7 +18,7 @@ export default class Record extends Resource {
     return 'records';
   }
 
-  delete(id, changesetID, callback) {
+  delete(id, changesetID) {
     const options = {
       method: 'DELETE',
       path: this.member(id),
@@ -32,7 +32,19 @@ export default class Record extends Resource {
       };
     }
 
-    return this.call(options, callback);
+    return this.call(options);
+  }
+
+  async history(params) {
+    const options = {
+      method: 'GET',
+      path: this.collectionAction('history'),
+      params,
+    };
+
+    const json = await this.call(options);
+
+    return new Page(json, this.resourcesName);
   }
 
   async query(params) {

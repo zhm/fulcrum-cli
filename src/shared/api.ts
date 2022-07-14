@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { chunk } from 'lodash';
+import { chunk, last } from 'lodash';
 import {
   Form, Record, RepeatableItemValue,
   RepeatableValue, Feature, DateUtils,
@@ -297,6 +297,12 @@ function buildChangesetAttributes(form: Form, comment?: string) {
   };
 }
 
+export async function fetchChangeset(client: Client, id: string) {
+  console.log('fetching changeset', id);
+
+  return new Changeset(await client.changesets.find(id));
+}
+
 export async function createChangeset(client: Client, form: Form, comment?: string) {
   console.log('creating changeset', blue(form.id), green(comment));
 
@@ -308,6 +314,12 @@ export async function createChangeset(client: Client, form: Form, comment?: stri
 export async function closeChangeset(client: Client, changeset: Changeset) {
   console.log('closing changeset', blue(changeset.id));
   return client.changesets.close(changeset.id);
+}
+
+export async function deleteRecord(client: Client, id: string, changeset?: Changeset) {
+  console.log('deleting record', blue(id));
+
+  return client.records.delete(id, changeset.id);
 }
 
 export async function saveRecord(client: Client, record: Record, changeset?: Changeset) {
@@ -332,4 +344,73 @@ export async function saveRecords(client: Client, form: Form, records: Record[],
   }
 
   await closeChangeset(client, changeset);
+}
+
+export async function revertChangeset(client: Client, changesetID: string) {
+  console.log('reverting changeset', changesetID);
+
+  const changeset = await fetchChangeset(client, changesetID);
+
+  const form = await fetchForm(client, changeset._formID);
+
+  const history = await client.records.history({ changeset_id: changesetID });
+
+  console.log('found', history.objects.length, 'records');
+
+  const operations = [];
+
+  for (const historyRecord of history.objects) {
+    switch (historyRecord.history_change_type) {
+      case 'u': {
+        const { objects: allVersions } = await client.records.history({
+          record_id: historyRecord.id,
+        });
+
+        const currentVersion = last(allVersions);
+
+        const previousVersion = allVersions.find((o) => o.version === historyRecord.version - 1);
+
+        operations.push({
+          type: 'update',
+          record: new Record({
+            ...previousVersion, version: currentVersion.version,
+          }, form),
+        });
+
+        break;
+      }
+      case 'c': {
+        operations.push({
+          type: 'delete',
+          id: historyRecord.id,
+        });
+
+        break;
+      }
+      case 'd': {
+        operations.push({
+          type: 'create',
+          record: new Record({
+            ...historyRecord,
+            id: null,
+          }, form),
+        });
+
+        break;
+      }
+      default: throw new Error(`invalid history change type: ${history.history_change_type}`);
+    }
+  }
+
+  const newChangeset = await createChangeset(client, form, `Reverting changeset ${changesetID}`);
+
+  for (const operation of operations) {
+    if (operation.type === 'delete') {
+      await deleteRecord(client, operation.id, newChangeset);
+    } else {
+      await saveRecord(client, operation.record, newChangeset);
+    }
+  }
+
+  await closeChangeset(client, newChangeset);
 }

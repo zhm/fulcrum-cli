@@ -8,7 +8,6 @@ export const description = 'Update calculation fields';
 export const builder = (yargs) => {
   yargs
     .option('sql', {
-      required: true,
       alias: 'sql',
       type: 'string',
       description: 'SQL query',
@@ -31,7 +30,7 @@ export const handler = async ({
 
   const form = await fetchForm(client, formID);
 
-  const records = await fetchRecordsBySQL(client, form, sql);
+  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
 
   for (const record of records) {
     await updateCalculatedFields(record, context);
