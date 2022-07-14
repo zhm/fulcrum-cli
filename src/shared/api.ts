@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {
-  Form, Record, RepeatableItemValue, RepeatableValue, Feature, DateUtils, User, Role,
+  Form, Record, RepeatableItemValue, RepeatableValue, Feature, DateUtils, User, Role, FormValues,
 } from 'fulcrum-core';
 import fs from 'fs';
 import path from 'path';
@@ -89,7 +89,7 @@ export async function updateCalculatedFields(record: Record, context: Context) {
   try {
     sandbox = new Sandbox({ template: EXPRESSIONS });
 
-    await updateCalculatedFieldsRecursive(sandbox, record, record, context);
+    await updateCalculatedFieldsRecursive(sandbox, record, record, record.formValues, context);
   } finally {
     if (sandbox) {
       await sandbox.shutdown();
@@ -112,8 +112,8 @@ function environmentFromEnvironmentVariables(): ExpressionEnvironment {
   };
 }
 
-export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: Record, feature: Feature, context: Context) {
-  const runtimeVariables = getFeatureVariables(record, feature, context, environmentFromEnvironmentVariables());
+export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: Record, feature: Feature, formValues: FormValues, context: Context) {
+  const runtimeVariables = getFeatureVariables(record, feature, formValues, context, environmentFromEnvironmentVariables());
 
   const { value, error } = await sandbox.execute({
     code: SCRIPT,
@@ -136,7 +136,11 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
   for (const formValue of feature.formValues.all) {
     if (formValue instanceof RepeatableValue) {
       for (const item of formValue.items) {
-        await updateCalculatedFieldsRecursive(sandbox, record, item, context);
+        const itemValues = item.formValues.copy();
+
+        itemValues.merge(formValues);
+
+        await updateCalculatedFieldsRecursive(sandbox, record, item, itemValues, context);
       }
     }
   }
@@ -180,7 +184,7 @@ const DEFAULT_ENVIRONMENT: ExpressionEnvironment = {
   applicationBuild: '',
 };
 
-function getFeatureVariables(record: Record, feature: Feature, context: Context, environment: ExpressionEnvironment) {
+function getFeatureVariables(record: Record, feature: Feature, formValues: FormValues, context: Context, environment: ExpressionEnvironment) {
   const repeatable = feature instanceof RepeatableItemValue ? feature.element : null;
   const container = repeatable ?? record.form;
 
@@ -195,7 +199,7 @@ function getFeatureVariables(record: Record, feature: Feature, context: Context,
     ...environment,
     expressions,
     form: record.form.toJSON(),
-    values: record.formValues.toJSON(),
+    values: formValues.toJSON(),
     repeatable: repeatable?.key ?? null,
 
     userEmail: context.user.email,
