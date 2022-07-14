@@ -1,11 +1,22 @@
 import axios from 'axios';
 import {
-  Form, Record, RepeatableItemValue, RepeatableValue, Feature, DateUtils,
+  Form, Record, RepeatableItemValue, RepeatableValue, Feature, DateUtils, User, Role,
 } from 'fulcrum-core';
 import fs from 'fs';
 import path from 'path';
 import Sandbox from 'v8-sandbox';
 import Client from '../api/client';
+
+export interface Organization {
+  id: string;
+  name: string;
+}
+
+export interface Context {
+  user: User;
+  role: Role;
+  organization: Organization;
+}
 
 export function createClient(endpoint: string, token: string) {
   return new Client({
@@ -17,6 +28,23 @@ export function createClient(endpoint: string, token: string) {
     request: axios,
     userAgent: 'Fulcrum CLI',
   });
+}
+
+export async function fetchContext(client: Client): Promise<Context> {
+  const json = await client.user.find();
+
+  const user = new User(json);
+
+  const context = json.contexts.find((o) => o.id === json.current_organization.id);
+
+  const role = new Role(context.role);
+
+  const organization = {
+    id: context.id,
+    name: context.name,
+  };
+
+  return { user, role, organization };
 }
 
 export async function fetchForm(client: Client, id: string) {
@@ -31,7 +59,15 @@ export async function fetchRecordsBySQL(client: Client, form: Form, sql: string)
   const records = [];
 
   for (const id of ids) {
-    records.push(new Record(await client.records.find(id), form));
+    const record = new Record(await client.records.find(id), form);
+
+    if (record.projectID) {
+      const project = await client.projects.find(record.projectID);
+
+      record.project = project;
+    }
+
+    records.push(record);
   }
 
   return records;
@@ -47,13 +83,13 @@ const SCRIPT = `
   setResult({ value: $$runtime.evaluate() });
 `;
 
-export async function updateCalculatedFields(record: Record) {
+export async function updateCalculatedFields(record: Record, context: Context) {
   let sandbox = null;
 
   try {
     sandbox = new Sandbox({ template: EXPRESSIONS });
 
-    await updateCalculatedFieldsRecursive(sandbox, record, record);
+    await updateCalculatedFieldsRecursive(sandbox, record, record, context);
   } finally {
     if (sandbox) {
       await sandbox.shutdown();
@@ -61,17 +97,23 @@ export async function updateCalculatedFields(record: Record) {
   }
 }
 
-export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: Record, feature: Feature) {
-  const repeatable = feature instanceof RepeatableItemValue ? feature.element : null;
-  const container = repeatable ?? record.form;
+function environmentFromEnvironmentVariables(): ExpressionEnvironment {
+  const { env } = process;
 
-  const expressions = container.elementsOfType('CalculatedField', false).map(((field) => ({
-    key: field.key,
-    dataName: field.dataName,
-    expression: field.expression,
-  })));
+  return {
+    ...(env.FULCRUM_LOCALE ? { locale: env.FULCRUM_LOCALE } : {}),
+    ...(env.FULCRUM_LANGUAGE ? { language: env.FULCRUM_LANGUAGE } : {}),
+    ...(env.FULCRUM_TIMEZONE ? { timeZone: env.FULCRUM_TIMEZONE } : {}),
+    ...(env.FULCRUM_DECIMAL_SEPARATOR ? { decimalSeparator: env.FULCRUM_DECIMAL_SEPARATOR } : {}),
+    ...(env.FULCRUM_GROUPING_SEPARATOR ? { groupingSeparator: env.FULCRUM_GROUPING_SEPARATOR } : {}),
+    ...(env.FULCRUM_CURRENCY_SYMBOL ? { currencySymbol: env.FULCRUM_CURRENCY_SYMBOL } : {}),
+    ...(env.FULCRUM_GROUPING_CODE ? { currencyCode: env.FULCRUM_GROUPING_CODE } : {}),
+    ...(env.FULCRUM_COUNTRY ? { currencyCode: env.FULCRUM_COUNTRY } : {}),
+  };
+}
 
-  const runtimeVariables = getFeatureVariables(record, feature, {});
+export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: Record, feature: Feature, context: Context) {
+  const runtimeVariables = getFeatureVariables(record, feature, context, environmentFromEnvironmentVariables());
 
   const { value, error } = await sandbox.execute({
     code: SCRIPT,
@@ -94,7 +136,7 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
   for (const formValue of feature.formValues.all) {
     if (formValue instanceof RepeatableValue) {
       for (const item of formValue.items) {
-        await updateCalculatedFieldsRecursive(sandbox, record, item);
+        await updateCalculatedFieldsRecursive(sandbox, record, item, context);
       }
     }
   }
@@ -138,7 +180,7 @@ const DEFAULT_ENVIRONMENT: ExpressionEnvironment = {
   applicationBuild: '',
 };
 
-function getFeatureVariables(record: Record, feature: Feature, environment: ExpressionEnvironment) {
+function getFeatureVariables(record: Record, feature: Feature, context: Context, environment: ExpressionEnvironment) {
   const repeatable = feature instanceof RepeatableItemValue ? feature.element : null;
   const container = repeatable ?? record.form;
 
@@ -156,16 +198,16 @@ function getFeatureVariables(record: Record, feature: Feature, environment: Expr
     values: record.formValues.toJSON(),
     repeatable: repeatable?.key ?? null,
 
-    userEmail: null,
-    userFullName: null,
-    userRoleName: null,
+    userEmail: context.user.email,
+    userFullName: context.user.fullName,
+    userRoleName: context.role.name,
 
     recordID: record.id,
     recordStatus: record.status,
     recordClientCreatedAt: record.clientCreatedAt,
     recordClientUpdatedAt: record.clientUpdatedAt,
     recordProject: record.projectID,
-    recordProjectName: null,
+    recordProjectName: record.projectName,
     recordGeometry: record.geometryAsGeoJSON,
 
     recordAltitude: record.altitude,

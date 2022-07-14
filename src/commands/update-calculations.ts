@@ -1,5 +1,5 @@
 import {
-  createClient, fetchForm, fetchRecordsBySQL, updateCalculatedFields,
+  createClient, fetchForm, fetchRecordsBySQL, updateCalculatedFields, fetchContext,
 } from '../shared/api';
 
 export const command = 'update-calculations';
@@ -26,11 +26,13 @@ export const handler = async ({
 }) => {
   const client = createClient(endpoint, token);
 
+  const context = await fetchContext(client);
+
   const form = await fetchForm(client, formID);
 
   const records = await fetchRecordsBySQL(client, form, sql);
 
-  await updateCalculatedFields(records[0]);
+  await updateCalculatedFields(records[0], context);
 
   // console.log('RECORDS', records.length);
   // console.log(form.elementsOfType('CalculatedField').length);

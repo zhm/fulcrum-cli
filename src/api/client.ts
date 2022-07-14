@@ -21,6 +21,7 @@ import Permission from './permission';
 import Share from './share';
 import ReportTemplate from './report-template';
 import Workflow from './workflow';
+import User from './user';
 import WorkflowExecution from './workflow_execution';
 import ExternalContributionsApiClient from './external-contributions-api-client';
 
@@ -79,6 +80,8 @@ export default class Client {
   _views: any;
 
   _permissions: any;
+
+  _user: any;
 
   _reportTemplates: any;
 
@@ -158,6 +161,13 @@ export default class Client {
 
   url(path, base) {
     return this.urlFromPath(path, base);
+  }
+
+  get user() {
+    if (!this._user) {
+      this._user = new User(this);
+    }
+    return this._user;
   }
 
   get choiceLists() {
