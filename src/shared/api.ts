@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import Sandbox from 'v8-sandbox';
 import Client from '../api/client';
+import { red, green, blue } from './log';
 
 export interface Organization {
   id: string;
@@ -127,7 +128,14 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
 
       const formValue = feature.formValues.createValue(element, result.value);
 
-      console.log('setting value from', feature.formValues.get(element.key).textValue, 'to', formValue.textValue);
+      console.log(
+        'Setting value',
+        blue(element.dataName),
+        'from',
+        red(feature.formValues.get(element.key).textValue),
+        'to',
+        green(formValue.textValue),
+      );
 
       feature.formValues.set(element, formValue);
     }
