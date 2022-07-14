@@ -7,7 +7,8 @@
     "start": "ts-node src/index.ts",
     "dev": "ts-node-dev src/index.ts",
     "lint": "eslint --ext js,ts src",
-    "test": "jest"
+    "test": "jest",
+    "update-expressions": "curl https://assets.fulcrumapp.com/expv1/expressions.js > resources/expressions.js"
   },
   "author": "Fulcrum",
   "devDependencies": {
