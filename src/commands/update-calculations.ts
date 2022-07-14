@@ -1,5 +1,5 @@
 import {
-  createClient, fetchForm, fetchRecordsBySQL, updateCalculatedFields, fetchContext,
+  createClient, fetchForm, fetchRecordsBySQL, updateCalculatedFields, fetchContext, saveRecords,
 } from '../shared/api';
 
 export const command = 'update-calculations';
@@ -35,4 +35,6 @@ export const handler = async ({
   for (const record of records) {
     await updateCalculatedFields(record, context);
   }
+
+  await saveRecords(client, form, records, 'Updating calculations');
 };

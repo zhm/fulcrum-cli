@@ -7,7 +7,7 @@ export default class Delete extends Mixin {
     const options = {
       method: 'DELETE',
       path: this.member(id),
-      body: this.attributesForObject(object),
+      data: this.attributesForObject(object),
     };
 
     const json = await this.call(options);

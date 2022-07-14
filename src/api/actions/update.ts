@@ -7,7 +7,7 @@ export default class Update extends Mixin {
     const options = {
       method: 'PUT',
       path: this.member(id),
-      body: this.attributesForObject(object),
+      data: this.attributesForObject(object),
     };
 
     const json = await this.call(options);

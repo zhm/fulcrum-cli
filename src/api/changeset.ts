@@ -15,13 +15,11 @@ export default class Changeset extends Resource {
     return 'changesets';
   }
 
-  async close(id, callback) {
-    const options = {
+  async close(id) {
+    const json = await this.call({
       method: 'PUT',
       path: this.memberAction(id, 'close'),
-    };
-
-    const json = await this.call(options);
+    });
 
     return json[this.resourceName];
   }

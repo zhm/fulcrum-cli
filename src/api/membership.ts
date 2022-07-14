@@ -20,7 +20,7 @@ export default class Membership extends Resource {
     const options = {
       method: 'POST',
       path: this.collectionAction('change_permissions'),
-      body: { change: changes },
+      data: { change: changes },
     };
 
     const json = await this.call(options);

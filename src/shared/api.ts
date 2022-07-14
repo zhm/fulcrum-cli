@@ -131,9 +131,9 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
       const formValue = feature.formValues.createValue(element, result.value);
 
       console.log(
-        'Record',
+        'record',
         blue(record.id),
-        'Setting value',
+        'updating calculation',
         blue(element.dataName),
         'from',
         red(feature.formValues.get(element.key)?.textValue ?? '[Blank]'),
@@ -141,7 +141,7 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
         green(formValue.textValue),
       );
 
-      feature.formValues.set(element, formValue);
+      feature.formValues.set(element.key, formValue);
     }
   }
 
@@ -282,12 +282,15 @@ function buildChangesetAttributes(form: Form, comment?: string) {
 }
 
 export async function createChangeset(client: Client, form: Form, comment?: string) {
-  const json = client.changesets.create(buildChangesetAttributes(form, comment));
+  console.log('creating changeset', blue(form.id), green(comment));
+
+  const json = await client.changesets.create(buildChangesetAttributes(form, comment));
 
   return new Changeset(json);
 }
 
 export async function closeChangeset(client: Client, changeset: Changeset) {
+  console.log('closing changeset', blue(changeset.id));
   return client.changesets.close(changeset.id);
 }
 
@@ -305,6 +308,8 @@ export async function saveRecords(client: Client, form: Form, records: Record[],
   const changeset = await createChangeset(client, form, comment);
 
   for (const record of records) {
+    console.log('syncing record', blue(record.id));
+
     await saveRecord(client, record, changeset);
   }
 

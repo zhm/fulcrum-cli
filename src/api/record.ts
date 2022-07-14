@@ -39,7 +39,7 @@ export default class Record extends Resource {
     const options = {
       method: 'POST',
       path: 'records/lookup',
-      body: params,
+      data: params,
     };
 
     const json = await this.call(options);

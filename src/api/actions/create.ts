@@ -11,7 +11,7 @@ export default class Create extends Mixin {
     const options = {
       method: 'POST',
       path: this.createAction,
-      body: this.attributesForObject(object),
+      data: this.attributesForObject(object),
     };
 
     const json = await this.call(options);
