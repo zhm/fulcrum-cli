@@ -1,6 +1,8 @@
 import axios from 'axios';
 import {
-  Form, Record, RepeatableItemValue, RepeatableValue, Feature, DateUtils, User, Role, FormValues,
+  Form, Record, RepeatableItemValue,
+  RepeatableValue, Feature, DateUtils,
+  User, Role, FormValues, Changeset,
 } from 'fulcrum-core';
 import fs from 'fs';
 import path from 'path';
@@ -129,10 +131,12 @@ export async function updateCalculatedFieldsRecursive(sandbox: Sandbox, record: 
       const formValue = feature.formValues.createValue(element, result.value);
 
       console.log(
+        'Record',
+        blue(record.id),
         'Setting value',
         blue(element.dataName),
         'from',
-        red(feature.formValues.get(element.key).textValue),
+        red(feature.formValues.get(element.key)?.textValue ?? '[Blank]'),
         'to',
         green(formValue.textValue),
       );
@@ -263,4 +267,46 @@ function getFeatureVariables(record: Record, feature: Feature, formValues: FormV
 
     currentLocation: null,
   };
+}
+
+function buildChangesetAttributes(form: Form, comment?: string) {
+  return {
+    form_id: form.id,
+    metadata: {
+      comment,
+      application: 'Fulcrum CLI',
+      platform: 'cli',
+      platform_version: '1.0.0',
+    },
+  };
+}
+
+export async function createChangeset(client: Client, form: Form, comment?: string) {
+  const json = client.changesets.create(buildChangesetAttributes(form, comment));
+
+  return new Changeset(json);
+}
+
+export async function closeChangeset(client: Client, changeset: Changeset) {
+  return client.changesets.close(changeset.id);
+}
+
+export async function saveRecord(client: Client, record: Record, changeset?: Changeset) {
+  record.changeset = changeset;
+
+  const json = await client.records.create(record.toJSON());
+
+  record.updateFromAPIAttributes(json);
+
+  return record;
+}
+
+export async function saveRecords(client: Client, form: Form, records: Record[], comment?: string) {
+  const changeset = await createChangeset(client, form, comment);
+
+  for (const record of records) {
+    await saveRecord(client, record, changeset);
+  }
+
+  await closeChangeset(client, changeset);
 }

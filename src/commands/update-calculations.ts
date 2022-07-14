@@ -32,9 +32,7 @@ export const handler = async ({
 
   const records = await fetchRecordsBySQL(client, form, sql);
 
-  await updateCalculatedFields(records[0], context);
-
-  // console.log('RECORDS', records.length);
-  // console.log(form.elementsOfType('CalculatedField').length);
-  // console.log(JSON.stringify(results.objects));
+  for (const record of records) {
+    await updateCalculatedFields(record, context);
+  }
 };

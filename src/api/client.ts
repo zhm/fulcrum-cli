@@ -112,9 +112,9 @@ export default class Client {
       options.url = this.urlFromPath(options.path, options.base);
     }
 
-    // TODO(zhm) using the query string token param eliminates a lot of OPTIONS cors preflight requests
     options.headers = {
       'User-Agent': this.userAgent,
+      'X-Require-Media': 'false',
       Accept: 'application/json',
     };
 
