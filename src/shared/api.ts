@@ -17,6 +17,14 @@ export interface Context {
   organization: Organization;
 }
 
+export type BatchOperationCallback = (object: any) => Promise<void>;
+
+export async function batch(objects: any[], callback: BatchOperationCallback) {
+  for (const list of chunk(objects, process.env.FULCRUM_BATCH_SIZE ?? 10)) {
+    await Promise.all(list.map(callback));
+  }
+}
+
 export function createClient(endpoint: string, token: string) {
   return new Client({
     base: `${endpoint}/api/v2`,
@@ -54,6 +62,12 @@ export async function fetchForm(client: Client, id: string) {
   return new Form(await client.forms.find(id));
 }
 
+export async function fetchRecord(client: Client, id: string, form: Form) {
+  console.log('fetching record', id);
+
+  return new Record(await client.records.find(id), form);
+}
+
 export async function fetchRecordsBySQL(client: Client, form: Form, sql: string, where?: string) {
   console.log('fetching records by sql', sql, where);
 
@@ -65,8 +79,8 @@ export async function fetchRecordsBySQL(client: Client, form: Form, sql: string,
 
   const records = [];
 
-  for (const id of ids) {
-    const record = new Record(await client.records.find(id), form);
+  await batch(ids, async (id) => {
+    const record = await fetchRecord(client, id, form);
 
     if (record.projectID) {
       console.log('fetching project', record.projectID);
@@ -77,7 +91,7 @@ export async function fetchRecordsBySQL(client: Client, form: Form, sql: string,
     }
 
     records.push(record);
-  }
+  });
 
   return records;
 }
@@ -143,11 +157,7 @@ export async function saveRecords(
 
   const changeset = await createChangeset(client, form, comment);
 
-  for (const batch of chunk(records, 5)) {
-    console.log('syncing batch');
-
-    await Promise.all(batch.map((record) => saveRecord(client, record, changeset)));
-  }
+  await batch(records, (record) => saveRecord(client, record, changeset));
 
   await closeChangeset(client, changeset);
 }
@@ -164,11 +174,7 @@ export async function deleteRecords(
 
   const changeset = await createChangeset(client, form, comment);
 
-  for (const batch of chunk(records, 5)) {
-    console.log('deleting batch');
-
-    await Promise.all(batch.map((record) => deleteRecord(client, record.id, changeset)));
-  }
+  await batch(records, (record) => deleteRecord(client, record.id, changeset));
 
   await closeChangeset(client, changeset);
 }
@@ -191,13 +197,12 @@ export async function executeRecordOperatons(
 
   const newChangeset = await createChangeset(client, form, comment);
 
-  for (const operation of operations) {
+  await batch(operations, async (operation) => {
     if (operation.type === 'delete') {
-      await deleteRecord(client, operation.id, newChangeset);
-    } else {
-      await saveRecord(client, operation.record, newChangeset);
+      return deleteRecord(client, operation.id, newChangeset);
     }
-  }
+    return saveRecord(client, operation.record, newChangeset);
+  });
 
   await closeChangeset(client, newChangeset);
 }
