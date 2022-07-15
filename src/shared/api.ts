@@ -325,7 +325,7 @@ export async function deleteRecord(client: Client, id: string, changeset?: Chang
 export async function saveRecord(client: Client, record: Record, changeset?: Changeset) {
   record.changeset = changeset;
 
-  console.log('syncing record', blue(record.id));
+  console.log(`${record.id ? 'creating' : 'updating'} record`, blue(record.id));
 
   const json = await client.records.create(record.toJSON());
 
