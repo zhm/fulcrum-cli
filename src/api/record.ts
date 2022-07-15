@@ -25,7 +25,7 @@ export default class Record extends Resource {
     };
 
     if (changesetID != null) {
-      options.body = {
+      options.data = {
         record: {
           changeset_id: changesetID,
         },

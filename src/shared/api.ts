@@ -129,13 +129,35 @@ export async function saveRecord(client: Client, record: Record, changeset?: Cha
   return record;
 }
 
-export async function saveRecords(client: Client, form: Form, records: Record[], comment?: string) {
+export async function saveRecords(
+  client: Client,
+  form: Form,
+  records: Record[],
+  comment?: string,
+) {
   const changeset = await createChangeset(client, form, comment);
 
   for (const batch of chunk(records, 5)) {
     console.log('syncing batch');
 
     await Promise.all(batch.map((record) => saveRecord(client, record, changeset)));
+  }
+
+  await closeChangeset(client, changeset);
+}
+
+export async function deleteRecords(
+  client: Client,
+  form: Form,
+  records: Record[],
+  comment?: string,
+) {
+  const changeset = await createChangeset(client, form, comment);
+
+  for (const batch of chunk(records, 5)) {
+    console.log('deleting batch');
+
+    await Promise.all(batch.map((record) => deleteRecord(client, record.id, changeset)));
   }
 
   await closeChangeset(client, changeset);
