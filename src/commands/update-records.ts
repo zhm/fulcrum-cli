@@ -28,12 +28,10 @@ export const builder = (yargs) => {
       description: 'Form ID',
     })
     .option('field', {
-      required: true,
       type: 'array',
       description: 'Field data name',
     })
     .option('value', {
-      required: true,
       type: 'array',
       description: 'Field value',
     })
@@ -41,11 +39,15 @@ export const builder = (yargs) => {
       type: 'string',
       description: 'Comment',
     })
+    .option('script', {
+      type: 'string',
+      description: 'Script file to execute',
+    })
     .strict(false);
 };
 
 export const handler = async ({
-  endpoint, token, sql, form: formID, comment, field, value, where,
+  endpoint, token, sql, form: formID, comment, field, value, where, script,
 }) => {
   const client = createClient(endpoint, token);
 
@@ -55,18 +57,32 @@ export const handler = async ({
 
   const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`, where);
 
-  if (field.length !== value.length) {
+  if (field && field.length !== value.length) {
     console.error('Must pass the same number of fields and values');
     return;
+  }
+
+  const results = [];
+
+  if (script) {
+    const mod = require(script);
+
+    for (const record of records) {
+      const result = await mod.processRecord(record);
+
+      if (result) {
+        results.push(result);
+      }
+    }
   }
 
   await updateRecordFields(
     client,
     form,
-    records,
+    results,
     context,
-    field,
-    value,
+    field ?? [],
+    value ?? [],
     comment ?? 'Updating records',
   );
 };
