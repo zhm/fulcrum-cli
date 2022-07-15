@@ -1,1 +1,0 @@
-{"version":3,"file":"attachment.js","sourceRoot":"","sources":["../../src/api/attachment.ts"],"names":[],"mappings":";;;;;AAAA,sEAA6C;AAE7C,MAAqB,UAAW,SAAQ,wBAAa;IACnD,IAAI,kBAAkB;QACpB,OAAO,EAAE,CAAC;IACZ,CAAC;IAED,IAAI,YAAY;QACd,OAAO,YAAY,CAAC;IACtB,CAAC;IAED,IAAI,aAAa;QACf,OAAO,aAAa,CAAC;IACvB,CAAC;CACF;AAZD,6BAYC"}
