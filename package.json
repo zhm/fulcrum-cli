@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
     "start": "ts-node src/index.ts",
     "dev": "ts-node-dev src/index.ts",
     "lint": "eslint --ext js,ts src",
