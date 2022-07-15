@@ -15,6 +15,12 @@ export const builder = (yargs) => {
       type: 'string',
       description: 'SQL query',
     })
+    .option('where', {
+      alias: 'w',
+      type: 'string',
+      default: '',
+      description: 'SQL where clause',
+    })
     .option('form', {
       required: true,
       alias: 'f',
@@ -39,7 +45,7 @@ export const builder = (yargs) => {
 };
 
 export const handler = async ({
-  endpoint, token, sql, form: formID, comment, field, value, ...args
+  endpoint, token, sql, form: formID, comment, field, value, where,
 }) => {
   const client = createClient(endpoint, token);
 
@@ -47,7 +53,7 @@ export const handler = async ({
 
   const form = await fetchForm(client, formID);
 
-  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
+  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`, where);
 
   if (field.length !== value.length) {
     console.error('Must pass the same number of fields and values');

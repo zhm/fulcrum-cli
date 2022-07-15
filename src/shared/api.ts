@@ -54,10 +54,12 @@ export async function fetchForm(client: Client, id: string) {
   return new Form(await client.forms.find(id));
 }
 
-export async function fetchRecordsBySQL(client: Client, form: Form, sql: string) {
-  console.log('fetching records by sql', sql);
+export async function fetchRecordsBySQL(client: Client, form: Form, sql: string, where?: string) {
+  console.log('fetching records by sql', sql, where);
 
-  const result = await client.query.run({ q: sql });
+  const query = where ? `${sql} WHERE ${where}` : sql;
+
+  const result = await client.query.run({ q: query });
 
   const ids = result.objects.map((o) => o._record_id ?? o.record_id ?? o.id);
 

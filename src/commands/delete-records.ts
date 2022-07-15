@@ -14,6 +14,12 @@ export const builder = (yargs) => {
       type: 'string',
       description: 'SQL query',
     })
+    .option('where', {
+      alias: 'w',
+      type: 'string',
+      default: '',
+      description: 'SQL where clause',
+    })
     .option('form', {
       required: true,
       alias: 'f',
@@ -28,13 +34,13 @@ export const builder = (yargs) => {
 };
 
 export const handler = async ({
-  endpoint, token, sql, form: formID, comment,
+  endpoint, token, sql, form: formID, comment, where,
 }) => {
   const client = createClient(endpoint, token);
 
   const form = await fetchForm(client, formID);
 
-  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
+  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`, where);
 
   await deleteRecords(client, form, records, comment ?? 'Delete records');
 };
