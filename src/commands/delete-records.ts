@@ -2,7 +2,6 @@ import {
   createClient,
   fetchForm,
   fetchRecordsBySQL,
-  fetchContext,
   deleteRecords,
 } from '../shared/api';
 

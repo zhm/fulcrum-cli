@@ -120,7 +120,7 @@ export async function deleteRecord(client: Client, id: string, changeset?: Chang
 export async function saveRecord(client: Client, record: Record, changeset?: Changeset) {
   record.changeset = changeset;
 
-  console.log(`${record.id ? 'creating' : 'updating'} record`, blue(record.id));
+  console.log(`${record.id ? 'updating' : 'creating'} record`, blue(record.id));
 
   const json = await client.records.create(record.toJSON());
 
@@ -135,6 +135,10 @@ export async function saveRecords(
   records: Record[],
   comment?: string,
 ) {
+  if (records.length === 0) {
+    return;
+  }
+
   const changeset = await createChangeset(client, form, comment);
 
   for (const batch of chunk(records, 5)) {
@@ -152,6 +156,10 @@ export async function deleteRecords(
   records: Record[],
   comment?: string,
 ) {
+  if (records.length === 0) {
+    return;
+  }
+
   const changeset = await createChangeset(client, form, comment);
 
   for (const batch of chunk(records, 5)) {
@@ -161,4 +169,33 @@ export async function deleteRecords(
   }
 
   await closeChangeset(client, changeset);
+}
+
+export interface RecordOperation {
+  type: 'create' | 'update' | 'delete';
+  id?: string;
+  record?: Record;
+}
+
+export async function executeRecordOperatons(
+  client: Client,
+  form: Form,
+  operations: RecordOperation[],
+  comment?: string,
+) {
+  if (operations.length === 0) {
+    return;
+  }
+
+  const newChangeset = await createChangeset(client, form, comment);
+
+  for (const operation of operations) {
+    if (operation.type === 'delete') {
+      await deleteRecord(client, operation.id, newChangeset);
+    } else {
+      await saveRecord(client, operation.record, newChangeset);
+    }
+  }
+
+  await closeChangeset(client, newChangeset);
 }
