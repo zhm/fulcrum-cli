@@ -1,0 +1,225 @@
+import path from 'path';
+import fs from 'fs';
+import {
+  Record, Feature, FormValues, DateUtils, RepeatableValue, RepeatableItemValue,
+} from 'fulcrum-core';
+import { SandboxCluster } from 'v8-sandbox';
+import { red, green, blue } from './log';
+import { Context } from './api';
+
+const EXPRESSIONS = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'expressions.js')).toString();
+
+const SCRIPT = `
+  Object.assign($$runtime, global.runtimeVariables);
+
+  $$runtime.prepare();
+
+  setResult({ value: $$runtime.evaluate() });
+`;
+
+let globalSandbox = null;
+
+function getSandbox() {
+  if (!globalSandbox) {
+    globalSandbox = new SandboxCluster({ workers: 2, template: EXPRESSIONS });
+  }
+  return globalSandbox;
+}
+
+export async function shutdownSandbox() {
+  if (globalSandbox) {
+    await globalSandbox.shutdown();
+  }
+}
+
+export async function updateCalculations(record: Record, context: Context) {
+  console.log('updating calculations for record', record.id);
+
+  await updateCalculationsRecursive(record, record, record.formValues, context);
+}
+
+function environmentFromEnvironmentVariables(): ExpressionEnvironment {
+  const { env } = process;
+
+  return {
+    ...(env.FULCRUM_LOCALE ? { locale: env.FULCRUM_LOCALE } : {}),
+    ...(env.FULCRUM_LANGUAGE ? { language: env.FULCRUM_LANGUAGE } : {}),
+    ...(env.FULCRUM_TIMEZONE ? { timeZone: env.FULCRUM_TIMEZONE } : {}),
+    ...(env.FULCRUM_DECIMAL_SEPARATOR ? { decimalSeparator: env.FULCRUM_DECIMAL_SEPARATOR } : {}),
+    ...(env.FULCRUM_GROUPING_SEPARATOR ? { groupingSeparator: env.FULCRUM_GROUPING_SEPARATOR } : {}),
+    ...(env.FULCRUM_CURRENCY_SYMBOL ? { currencySymbol: env.FULCRUM_CURRENCY_SYMBOL } : {}),
+    ...(env.FULCRUM_GROUPING_CODE ? { currencyCode: env.FULCRUM_GROUPING_CODE } : {}),
+    ...(env.FULCRUM_COUNTRY ? { currencyCode: env.FULCRUM_COUNTRY } : {}),
+  };
+}
+
+export async function updateCalculationsRecursive(
+  record: Record,
+  feature: Feature,
+  formValues: FormValues,
+  context: Context,
+) {
+  const runtimeVariables = getFeatureVariables(
+    record,
+    feature,
+    formValues,
+    context,
+    environmentFromEnvironmentVariables(),
+  );
+
+  const { value, error } = await getSandbox().execute({
+    code: SCRIPT,
+    globals: { runtimeVariables },
+    timeout: 2000,
+  });
+
+  for (const result of value) {
+    if (result.type === 'calculation' && !result.error) {
+      const element = record.form.get(result.key);
+
+      const formValue = feature.formValues.createValue(element, result.value);
+
+      console.log(
+        'record',
+        blue(record.id),
+        'updating calculation',
+        blue(element.dataName),
+        'from',
+        red(feature.formValues.get(element.key)?.textValue ?? '[Blank]'),
+        'to',
+        green(formValue.textValue),
+      );
+
+      feature.formValues.set(element.key, formValue);
+    }
+  }
+
+  for (const formValue of feature.formValues.all) {
+    if (formValue instanceof RepeatableValue) {
+      for (const item of formValue.items) {
+        const itemValues = item.formValues.copy();
+
+        itemValues.merge(formValues);
+
+        await updateCalculationsRecursive(record, item, itemValues, context);
+      }
+    }
+  }
+}
+
+interface ExpressionEnvironment {
+  locale?: string;
+  language?: string;
+  timeZone?: string;
+  decimalSeparator?: string;
+  groupingSeparator?: string;
+  currencySymbol?: string;
+  currencyCode?: string;
+  country?: string;
+  deviceIdentifier?: string;
+  deviceModel?: string;
+  deviceManufacturer?: string;
+  platform?: string;
+  platformVersion?: string;
+  application?: string;
+  applicationVersion?: string;
+  applicationBuild?: string;
+}
+
+const DEFAULT_ENVIRONMENT: ExpressionEnvironment = {
+  locale: 'en_US',
+  language: 'en-US',
+  timeZone: 'America/New_York',
+  decimalSeparator: '.',
+  groupingSeparator: ',',
+  currencySymbol: '$',
+  currencyCode: 'USD',
+  country: 'US',
+  deviceIdentifier: 'Unknown',
+  deviceModel: 'Unknown',
+  deviceManufacturer: 'Unknown',
+  platform: 'cli',
+  platformVersion: '1.0.0',
+  application: 'Fulcrum CLI',
+  applicationVersion: '1.0.0',
+  applicationBuild: '',
+};
+
+function getFeatureVariables(
+  record: Record,
+  feature: Feature,
+  formValues: FormValues,
+  context: Context,
+  environment: ExpressionEnvironment,
+) {
+  const repeatable = feature instanceof RepeatableItemValue ? feature.element : null;
+  const container = repeatable ?? record.form;
+
+  const expressions = container.elementsOfType('CalculatedField', false).map(((field) => ({
+    key: field.key,
+    dataName: field.dataName,
+    expression: field.expression,
+  })));
+
+  return {
+    ...DEFAULT_ENVIRONMENT,
+    ...environment,
+    expressions,
+    form: record.form.toJSON(),
+    values: formValues.toJSON(),
+    repeatable: repeatable?.key ?? null,
+
+    userEmail: context.user.email,
+    userFullName: context.user.fullName,
+    userRoleName: context.role.name,
+
+    recordID: record.id,
+    recordStatus: record.status,
+    recordClientCreatedAt: record.clientCreatedAt,
+    recordClientUpdatedAt: record.clientUpdatedAt,
+    recordProject: record.projectID,
+    recordProjectName: record.projectName,
+    recordGeometry: record.geometryAsGeoJSON,
+
+    recordAltitude: record.altitude,
+    recordVerticalAccuracy: record.recordVerticalAccuracy,
+    recordHorizontalAccuracy: record.recordHorizontalAccuracy,
+
+    recordCreatedLatitude: record.createdLatitude,
+    recordCreatedLongitude: record.createdLongitude,
+    recordCreatedAltitude: record.createdAltitude,
+    recordCreatedAccuracy: record.createdAccuracy,
+
+    recordUpdatedLatitude: record.updatedLatitude,
+    recordUpdatedLongitude: record.updatedLongitude,
+    recordUpdatedAltitude: record.updatedAltitude,
+    recordUpdatedAccuracy: record.updatedAccuracy,
+
+    recordCreatedDuration: record.createdDuration,
+    recordUpdatedDuration: record.updatedDuration,
+    recordEditedDuration: record.editedDuration,
+
+    featureID: feature.id,
+    featureIndex: feature.index,
+    featureIsNew: feature.id == null,
+    featureCreatedAt: DateUtils.formatEpochTimestamp(feature.createdAt),
+    featureUpdatedAt: DateUtils.formatEpochTimestamp(feature.updatedAt),
+    featureGeometry: feature.geometryAsGeoJSON,
+
+    featureCreatedLatitude: feature.createdLatitude,
+    featureCreatedLongitude: feature.createdLongitude,
+    featureCreatedAltitude: feature.createdAltitude,
+    featureCreatedAccuracy: feature.createdAccuracy,
+
+    featureUpdatedLatitude: feature.updatedLatitude,
+    featureUpdatedLongitude: feature.updatedLongitude,
+    featureUpdatedAltitude: feature.updatedAltitude,
+    featureUpdatedAccuracy: feature.updatedAccuracy,
+
+    featureCreatedDuration: feature.createdDuration,
+    featureUpdatedDuration: feature.updatedDuration,
+    featureEditedDuration: feature.editedDuration,
+
+    currentLocation: null,
+  };
+}

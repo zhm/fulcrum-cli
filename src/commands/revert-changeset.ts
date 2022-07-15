@@ -1,6 +1,5 @@
-import {
-  createClient, revertChangeset,
-} from '../shared/api';
+import { createClient } from '../shared/api';
+import revertChangeset from '../shared/revert-changeset';
 
 export const command = 'revert-changeset';
 export const description = 'Revert a changeset';

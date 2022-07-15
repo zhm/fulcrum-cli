@@ -1,7 +1,11 @@
 import {
-  createClient, fetchForm, fetchRecordsBySQL, updateCalculatedFields, fetchContext, saveRecords,
-  shutdownSandbox,
+  createClient,
+  fetchForm,
+  fetchRecordsBySQL,
+  fetchContext,
+  saveRecords,
 } from '../shared/api';
+import { updateCalculations, shutdownSandbox } from '../shared/update-calculations';
 
 export const command = 'update-calculations';
 export const description = 'Update calculation fields';
@@ -33,7 +37,7 @@ export const handler = async ({
   const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
 
   for (const record of records) {
-    await updateCalculatedFields(record, context);
+    await updateCalculations(record, context);
   }
 
   await saveRecords(client, form, records, 'Updating calculations');
