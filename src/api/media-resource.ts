@@ -31,10 +31,10 @@ export default class MediaResource extends Resource {
     return json[this.resourceName];
   }
 
-  async downloadVersion(accessKey, version, callback) {
+  async downloadVersion(accessKey, version) {
     const body = await this.find(accessKey);
 
-    return this.download(body[version], callback);
+    return this.download(body[version]);
   }
 
   original(accessKey) {

@@ -15,16 +15,16 @@ export default class Signature extends MediaResource {
     return 'signatures';
   }
 
-  large(id, callback) {
-    return this.downloadVersion(id, 'large', callback);
+  large(id) {
+    return this.downloadVersion(id, 'large');
   }
 
   largeURL(id) {
     return this.client.url(this.memberAction(id, 'large', 'png'));
   }
 
-  thumbnail(id, callback) {
-    return this.downloadVersion(id, 'thumbnail', callback);
+  thumbnail(id) {
+    return this.downloadVersion(id, 'thumbnail');
   }
 
   thumbnailURL(id) {

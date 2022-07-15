@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import MediaResource from './media-resource';
 
 export default class Audio extends MediaResource {
@@ -19,7 +17,7 @@ export default class Audio extends MediaResource {
     return 'audio/upload';
   }
 
-  async uploadTrack(file, attributes, progress, callback) {
+  async uploadTrack(file, attributes, progress) {
     const options = {
       method: 'POST',
       path: this.createAction,
@@ -30,15 +28,15 @@ export default class Audio extends MediaResource {
     options.fields['audio[access_key]'] = attributes.access_key;
     options.files['audio[track]'] = file;
 
-    options.progress = progress;
+    // options.progress = progress;
 
     const json = await this.call(options);
 
     return json[this.resourceName];
   }
 
-  track(id, callback) {
-    return this.call({ path: this.trackURL(id, 'json') }, callback);
+  track(id) {
+    return this.call({ path: this.trackURL(id, 'json') });
   }
 
   audioURL(id) {

@@ -15,16 +15,16 @@ export default class Photo extends MediaResource {
     return 'photos';
   }
 
-  large(id, callback) {
-    return this.downloadVersion(id, 'large', callback);
+  large(id) {
+    return this.downloadVersion(id, 'large');
   }
 
   largeURL(id) {
     return this.client.url(this.memberAction(id, 'large', 'jpg'));
   }
 
-  thumbnail(id, callback) {
-    return this.downloadVersion(id, 'thumbnail', callback);
+  thumbnail(id) {
+    return this.downloadVersion(id, 'thumbnail');
   }
 
   thumbnailURL(id) {

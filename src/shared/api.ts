@@ -131,8 +131,19 @@ function environmentFromEnvironmentVariables(): ExpressionEnvironment {
   };
 }
 
-export async function updateCalculatedFieldsRecursive(record: Record, feature: Feature, formValues: FormValues, context: Context) {
-  const runtimeVariables = getFeatureVariables(record, feature, formValues, context, environmentFromEnvironmentVariables());
+export async function updateCalculatedFieldsRecursive(
+  record: Record,
+  feature: Feature,
+  formValues: FormValues,
+  context: Context,
+) {
+  const runtimeVariables = getFeatureVariables(
+    record,
+    feature,
+    formValues,
+    context,
+    environmentFromEnvironmentVariables(),
+  );
 
   const { value, error } = await getSandbox().execute({
     code: SCRIPT,
@@ -212,7 +223,13 @@ const DEFAULT_ENVIRONMENT: ExpressionEnvironment = {
   applicationBuild: '',
 };
 
-function getFeatureVariables(record: Record, feature: Feature, formValues: FormValues, context: Context, environment: ExpressionEnvironment) {
+function getFeatureVariables(
+  record: Record,
+  feature: Feature,
+  formValues: FormValues,
+  context: Context,
+  environment: ExpressionEnvironment,
+) {
   const repeatable = feature instanceof RepeatableItemValue ? feature.element : null;
   const container = repeatable ?? record.form;
 

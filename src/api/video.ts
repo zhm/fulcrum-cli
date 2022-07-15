@@ -45,8 +45,8 @@ export default class Video extends MediaResource {
     return this.client.url(this.memberAction(id, 'thumbnail_large', 'jpg'));
   }
 
-  thumbnail(id, callback) {
-    return this.downloadVersion(id, 'thumbnail_medium_square', callback);
+  thumbnail(id) {
+    return this.downloadVersion(id, 'thumbnail_medium_square');
   }
 
   async track(id) {
