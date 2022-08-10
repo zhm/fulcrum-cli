@@ -19,6 +19,8 @@ export interface Context {
 
 export type BatchOperationCallback = (object: any) => Promise<void>;
 
+export type ChangesetOperationCallback = (changeset: Changeset) => Promise<void>;
+
 export async function batch(objects: any[], callback: BatchOperationCallback) {
   for (const list of chunk(objects, process.env.FULCRUM_BATCH_SIZE ?? 10)) {
     await Promise.all(list.map(callback));
@@ -145,6 +147,19 @@ export async function saveRecord(client: Client, record: Record, changeset?: Cha
   return record;
 }
 
+export async function withChangeset(
+  client: Client,
+  form: Form,
+  comment: string,
+  callback: ChangesetOperationCallback,
+) {
+  const changeset = await createChangeset(client, form, comment);
+
+  await callback(changeset);
+
+  await closeChangeset(client, changeset);
+}
+
 export async function saveRecords(
   client: Client,
   form: Form,
@@ -155,11 +170,9 @@ export async function saveRecords(
     return;
   }
 
-  const changeset = await createChangeset(client, form, comment);
-
-  await batch(records, (record) => saveRecord(client, record, changeset));
-
-  await closeChangeset(client, changeset);
+  await withChangeset(client, form, comment, async (changeset) => {
+    await batch(records, (record) => saveRecord(client, record, changeset));
+  });
 }
 
 export async function deleteRecords(
@@ -172,11 +185,9 @@ export async function deleteRecords(
     return;
   }
 
-  const changeset = await createChangeset(client, form, comment);
-
-  await batch(records, (record) => deleteRecord(client, record.id, changeset));
-
-  await closeChangeset(client, changeset);
+  await withChangeset(client, form, comment, async (changeset) => {
+    await batch(records, (record) => deleteRecord(client, record.id, changeset));
+  });
 }
 
 export interface RecordOperation {
@@ -195,14 +206,12 @@ export async function executeRecordOperatons(
     return;
   }
 
-  const newChangeset = await createChangeset(client, form, comment);
-
-  await batch(operations, async (operation) => {
+  const update = (changeset) => batch(operations, (operation) => {
     if (operation.type === 'delete') {
-      return deleteRecord(client, operation.id, newChangeset);
+      return deleteRecord(client, operation.id, changeset);
     }
-    return saveRecord(client, operation.record, newChangeset);
+    return saveRecord(client, operation.record, changeset);
   });
 
-  await closeChangeset(client, newChangeset);
+  await withChangeset(client, form, comment, update);
 }
