@@ -21,7 +21,7 @@ let globalSandbox = null;
 
 function getSandbox() {
   if (!globalSandbox) {
-    globalSandbox = new SandboxCluster({ workers: 2, template: EXPRESSIONS });
+    globalSandbox = new SandboxCluster({ workers: 4, template: EXPRESSIONS });
   }
   return globalSandbox;
 }

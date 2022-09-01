@@ -22,7 +22,7 @@ export type BatchOperationCallback = (object: any) => Promise<void>;
 export type ChangesetOperationCallback = (changeset: Changeset) => Promise<void>;
 
 export async function batch(objects: any[], callback: BatchOperationCallback) {
-  for (const list of chunk(objects, process.env.FULCRUM_BATCH_SIZE ?? 10)) {
+  for (const list of chunk(objects, process.env.FULCRUM_BATCH_SIZE ?? 20)) {
     await Promise.all(list.map(callback));
   }
 }

@@ -4,6 +4,7 @@ import {
   fetchRecordsBySQL,
   fetchContext,
   saveRecords,
+  batch,
 } from '../shared/api';
 import { updateCalculations, shutdownSandbox } from '../shared/update-calculations';
 
@@ -40,9 +41,7 @@ export const handler = async ({
 
   const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
 
-  for (const record of records) {
-    await updateCalculations(record, context);
-  }
+  await batch(records, (record) => updateCalculations(record, context));
 
   await saveRecords(client, form, records, comment ?? 'Updating calculations');
 
