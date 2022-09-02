@@ -3,6 +3,7 @@ import { chunk } from 'lodash';
 import {
   Form, Record, User, Role, Changeset,
 } from 'fulcrum-core';
+import queue from 'async/queue';
 import Client from '../api/client';
 import { red, green, blue } from './log';
 
@@ -22,9 +23,13 @@ export type BatchOperationCallback = (object: any) => Promise<void>;
 export type ChangesetOperationCallback = (changeset: Changeset) => Promise<void>;
 
 export async function batch(objects: any[], callback: BatchOperationCallback) {
-  for (const list of chunk(objects, process.env.FULCRUM_BATCH_SIZE ?? 20)) {
-    await Promise.all(list.map(callback));
-  }
+  const q = queue(async (task) => {
+    await callback(task);
+  }, process.env.FULCRUM_BATCH_SIZE ?? 10);
+
+  q.push(objects);
+
+  await q.drain();
 }
 
 export function createClient(endpoint: string, token: string) {
