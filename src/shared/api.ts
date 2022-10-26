@@ -75,6 +75,50 @@ export async function fetchRecord(client: Client, id: string, form: Form) {
   return new Record(await client.records.find(id), form);
 }
 
+export async function fetchAllRawRecords(client: Client, form: Form) {
+  const perPage = 10000; // allows batch testing in smaller datasets if desired
+  const rawRecordsArr = [];
+  const rawRecords = await client.records.all({ form_id: form.id, per_page: perPage });
+  rawRecordsArr.push(...rawRecords.objects);
+  if (rawRecords.totalPages > 1) {
+    const pages = Array.from({ length: rawRecords.totalPages - 1 }, (_, i) => i + 2);
+    await batch(pages, async (pg) => {
+      const otherRecs = await client.records.all({ form_id: form.id, per_page: perPage, page: pg });
+      rawRecordsArr.push(...otherRecs.objects);
+    });
+  }
+  return rawRecordsArr;
+}
+
+export async function fetchRecordsByREST(client: Client, form: Form) {
+  console.log('fetching records for form ', blue(form.id));
+  const rawRecordsArr = await fetchAllRawRecords(client, form);
+  const projects = await client.projects.all();
+  const projectsMap = new Map(
+    projects.objects.map((p) => [p.id, p]),
+  );
+
+  const records = rawRecordsArr.map((record) => {
+    const newRecord = new Record(record, form);
+    if (record.project_id) {
+      console.log(
+        'setting project of record',
+        blue(record.id),
+        'to',
+        green(record.project_id),
+      );
+      const project = projectsMap.get(record.project_id);
+      // don't need to check if project is undefined, because records
+      // are updated when their projects are deleted (but maybe the project
+      // could be deleted while this script is running?)
+      newRecord.project = project;
+    }
+    return newRecord;
+  });
+
+  return records;
+}
+
 export async function fetchRecordsBySQL(client: Client, form: Form, sql: string, where?: string) {
   console.log('fetching records by sql', sql, where);
 
@@ -83,16 +127,19 @@ export async function fetchRecordsBySQL(client: Client, form: Form, sql: string,
   const result = await client.query.run({ q: query });
 
   const ids = result.objects.map((o) => o._record_id ?? o.record_id ?? o.id);
-
+  const projects = await client.projects.all();
+  const projectsMap = new Map(
+    projects.objects.map((p) => [p.id, p]),
+  );
   const records = [];
 
   await batch(ids, async (id) => {
     const record = await fetchRecord(client, id, form);
 
     if (record.projectID) {
-      console.log('fetching project', record.projectID);
+      console.log(`setting project of record ${id} to ${record.projectID}`);
 
-      const project = await client.projects.find(record.projectID);
+      const project = projectsMap.get(record.projectID);
 
       record.project = project;
     }
