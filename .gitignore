@@ -6,3 +6,4 @@ test.db
 bench/*.db
 report.*
 output.log
+.vscode/
