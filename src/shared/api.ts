@@ -1,5 +1,5 @@
+import http from 'http';
 import axios from 'axios';
-import { chunk } from 'lodash';
 import {
   Form, Record, User, Role, Changeset,
 } from 'fulcrum-core';
@@ -25,7 +25,7 @@ export type ChangesetOperationCallback = (changeset: Changeset) => Promise<void>
 export async function batch(objects: any[], callback: BatchOperationCallback) {
   const q = queue(async (task) => {
     await callback(task);
-  }, process.env.FULCRUM_BATCH_SIZE ?? 10);
+  }, process.env.FULCRUM_BATCH_SIZE ?? 15);
 
   q.push(objects);
 
@@ -33,13 +33,17 @@ export async function batch(objects: any[], callback: BatchOperationCallback) {
 }
 
 export function createClient(endpoint: string, token: string) {
+  const request = axios.create({
+    httpAgent: new http.Agent({ keepAlive: true }),
+  });
+
   return new Client({
     base: `${endpoint}/api/v2`,
     config: {
       query_url: endpoint,
     },
     token,
-    request: axios,
+    request,
     userAgent: 'Fulcrum CLI',
   });
 }
