@@ -2,6 +2,7 @@ import {
   createClient,
   fetchForm,
   fetchRecordsBySQL,
+  fetchRecordsByREST,
   fetchContext,
   saveRecords,
   batch,
@@ -39,7 +40,7 @@ export const handler = async ({
 
   const form = await fetchForm(client, formID);
 
-  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
+  const records = await fetchRecordsByREST(client, form);
 
   await batch(records, (record) => updateCalculations(record, context));
 
