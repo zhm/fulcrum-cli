@@ -6,6 +6,7 @@ import Create from './actions/create';
 import Update from './actions/update';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Workflow extends Resource {
   get resourceName() {
@@ -17,8 +18,5 @@ export default class Workflow extends Resource {
   }
 }
 
-List.includeInto(Workflow);
-Find.includeInto(Workflow);
-Create.includeInto(Workflow);
-Update.includeInto(Workflow);
-Delete.includeInto(Workflow);
+interface Workflow extends List, Find, Create, Update, Delete {}
+applyMixins(Workflow, [List, Find, Create, Update, Delete]);

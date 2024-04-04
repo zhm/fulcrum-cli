@@ -3,6 +3,7 @@
 import List from './actions/list';
 import Find from './actions/find';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Project extends Resource {
   get resourceName() {
@@ -14,5 +15,5 @@ export default class Project extends Resource {
   }
 }
 
-List.includeInto(Project);
-Find.includeInto(Project);
+interface Project extends List, Find {}
+applyMixins(Project, [List, Find]);

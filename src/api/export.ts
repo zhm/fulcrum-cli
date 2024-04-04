@@ -5,6 +5,7 @@ import Find from './actions/find';
 import Create from './actions/create';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Export extends Resource {
   get resourceName() {
@@ -16,7 +17,5 @@ export default class Export extends Resource {
   }
 }
 
-List.includeInto(Export);
-Find.includeInto(Export);
-Create.includeInto(Export);
-Delete.includeInto(Export);
+interface Export extends List, Find, Create, Delete {}
+applyMixins(Export, [List, Find, Create, Delete]);

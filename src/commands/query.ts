@@ -20,3 +20,10 @@ export const handler = async ({ endpoint, token, sql }) => {
 
   console.log(JSON.stringify(results.objects));
 };
+
+export default {
+  command,
+  description,
+  builder,
+  handler,
+};

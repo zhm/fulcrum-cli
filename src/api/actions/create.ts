@@ -1,8 +1,6 @@
 // @ts-nocheck
 
-import Mixin from 'mixmatch';
-
-export default class Create extends Mixin {
+export default class Create {
   get createAction() {
     return this.collection();
   }

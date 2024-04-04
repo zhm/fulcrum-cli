@@ -1,8 +1,6 @@
 // @ts-nocheck
 
-import Mixin from 'mixmatch';
-
-export default class History extends Mixin {
+export default class History {
   async history(id: string, params = {}) {
     const options = {
       method: 'GET',

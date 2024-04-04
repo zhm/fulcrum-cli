@@ -5,6 +5,7 @@ import Find from './actions/find';
 import Create from './actions/create';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Share extends Resource {
   get resourceName() {
@@ -16,7 +17,5 @@ export default class Share extends Resource {
   }
 }
 
-List.includeInto(Share);
-Find.includeInto(Share);
-Create.includeInto(Share);
-Delete.includeInto(Share);
+interface Share extends List, Find, Create, Delete {}
+applyMixins(Share, [List, Find, Create, Delete]);

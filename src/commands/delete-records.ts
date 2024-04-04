@@ -5,9 +5,9 @@ import {
   deleteRecords,
 } from '../shared/api';
 
-export const command = 'delete-records';
-export const description = 'Delete records';
-export const builder = (yargs) => {
+const command = 'delete-records';
+const description = 'Delete records';
+const builder = (yargs) => {
   yargs
     .option('sql', {
       alias: 'sql',
@@ -33,7 +33,7 @@ export const builder = (yargs) => {
     .strict(false);
 };
 
-export const handler = async ({
+const handler = async ({
   endpoint, token, sql, form: formID, comment, where,
 }) => {
   const client = createClient(endpoint, token);
@@ -43,4 +43,11 @@ export const handler = async ({
   const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`, where);
 
   await deleteRecords(client, form, records, comment ?? 'Delete records');
+};
+
+export default {
+  command,
+  description,
+  builder,
+  handler,
 };

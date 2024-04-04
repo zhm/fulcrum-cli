@@ -6,6 +6,7 @@ import Create from './actions/create';
 import Update from './actions/update';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Membership extends Resource {
   get resourceName() {
@@ -29,8 +30,5 @@ export default class Membership extends Resource {
   }
 }
 
-List.includeInto(Membership);
-Find.includeInto(Membership);
-Create.includeInto(Membership);
-Update.includeInto(Membership);
-Delete.includeInto(Membership);
+interface Membership extends List, Find, Create, Update, Delete {}
+applyMixins(Membership, [List, Find, Create, Update, Delete]);

@@ -6,6 +6,7 @@ import Create from './actions/create';
 import Update from './actions/update';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class ClassificationSet extends Resource {
   get resourceName() {
@@ -17,8 +18,5 @@ export default class ClassificationSet extends Resource {
   }
 }
 
-List.includeInto(ClassificationSet);
-Find.includeInto(ClassificationSet);
-Create.includeInto(ClassificationSet);
-Update.includeInto(ClassificationSet);
-Delete.includeInto(ClassificationSet);
+interface ClassificationSet extends List, Find, Create, Update, Delete {}
+applyMixins(ClassificationSet, [List, Find, Create, Update, Delete]);

@@ -1,8 +1,6 @@
 // @ts-nocheck
 
-import Mixin from 'mixmatch';
-
-export default class Update extends Mixin {
+export default class Update {
   async update(id, object) {
     const options = {
       method: 'PUT',

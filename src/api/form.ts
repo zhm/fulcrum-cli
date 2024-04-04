@@ -6,6 +6,7 @@ import Create from './actions/create';
 import Update from './actions/update';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Form extends Resource {
   get resourceName() {
@@ -28,8 +29,5 @@ export default class Form extends Resource {
   }
 }
 
-List.includeInto(Form);
-Find.includeInto(Form);
-Create.includeInto(Form);
-Update.includeInto(Form);
-Delete.includeInto(Form);
+interface Form extends List, Find, Create, Update, Delete {} // eslint-disable-line
+applyMixins(Form, [List, Find, Create, Update, Delete]);

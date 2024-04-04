@@ -1,9 +1,7 @@
 import http from 'http';
 import axios from 'axios';
-import {
-  Form, Record, User, Role, Changeset,
-} from 'fulcrum-core';
 import queue from 'async/queue';
+import Core from 'fulcrum-core';
 import Client from '../api/client';
 import { red, green, blue } from './log';
 
@@ -13,14 +11,14 @@ export interface Organization {
 }
 
 export interface Context {
-  user: User;
-  role: Role;
+  user: Core.User;
+  role: Core.Role;
   organization: Organization;
 }
 
-export type BatchOperationCallback = (object: any) => Promise<void>;
+export type BatchOperationCallback = (object: any) => Promise<any>;
 
-export type ChangesetOperationCallback = (changeset: Changeset) => Promise<void>;
+export type ChangesetOperationCallback = (changeset: Core.Changeset) => Promise<any>;
 
 export async function batch(objects: any[], callback: BatchOperationCallback) {
   const q = queue(async (task) => {
@@ -53,11 +51,11 @@ export async function fetchContext(client: Client): Promise<Context> {
 
   const json = await client.user.find();
 
-  const user = new User(json);
+  const user = new Core.User(json);
 
   const context = json.contexts.find((o) => o.id === json.current_organization.id);
 
-  const role = new Role(context.role);
+  const role = new Core.Role(context.role);
 
   const organization = {
     id: context.id,
@@ -70,13 +68,13 @@ export async function fetchContext(client: Client): Promise<Context> {
 export async function fetchForm(client: Client, id: string) {
   console.log('fetching form', id);
 
-  return new Form(await client.forms.find(id));
+  return new Core.Form(await client.forms.find(id));
 }
 
 export async function fetchRecord(client: Client, id: string, form: Form) {
   console.log('fetching record', id);
 
-  return new Record(await client.records.find(id), form);
+  return new Core.Record(await client.records.find(id), form);
 }
 
 export async function fetchRecordsBySQL(client: Client, form: Form, sql: string, where?: string) {
@@ -107,7 +105,7 @@ export async function fetchRecordsBySQL(client: Client, form: Form, sql: string,
   return records;
 }
 
-function buildChangesetAttributes(form: Form, comment?: string) {
+function buildChangesetAttributes(form: Core.Form, comment?: string) {
   return {
     form_id: form.id,
     metadata: {
@@ -122,29 +120,29 @@ function buildChangesetAttributes(form: Form, comment?: string) {
 export async function fetchChangeset(client: Client, id: string) {
   console.log('fetching changeset', id);
 
-  return new Changeset(await client.changesets.find(id));
+  return new Core.Changeset(await client.changesets.find(id));
 }
 
-export async function createChangeset(client: Client, form: Form, comment?: string) {
+export async function createChangeset(client: Client, form: Core.Form, comment?: string) {
   console.log('creating changeset', blue(form.id), green(comment));
 
   const json = await client.changesets.create(buildChangesetAttributes(form, comment));
 
-  return new Changeset(json);
+  return new Core.Changeset(json);
 }
 
-export async function closeChangeset(client: Client, changeset: Changeset) {
+export async function closeChangeset(client: Client, changeset: Core.Changeset) {
   console.log('closing changeset', blue(changeset.id));
   return client.changesets.close(changeset.id);
 }
 
-export async function deleteRecord(client: Client, id: string, changeset?: Changeset) {
+export async function deleteRecord(client: Client, id: string, changeset?: Core.Changeset) {
   console.log('deleting record', blue(id));
 
   return client.records.delete(id, changeset.id);
 }
 
-export async function saveRecord(client: Client, record: Record, changeset?: Changeset) {
+export async function saveRecord(client: Client, record: Core.Record, changeset?: Core.Changeset) {
   record.changeset = changeset;
 
   console.log(`${record.id ? 'updating' : 'creating'} record`, blue(record.id));
@@ -158,7 +156,7 @@ export async function saveRecord(client: Client, record: Record, changeset?: Cha
 
 export async function withChangeset(
   client: Client,
-  form: Form,
+  form: Core.Form,
   comment: string,
   callback: ChangesetOperationCallback,
 ) {
@@ -171,8 +169,8 @@ export async function withChangeset(
 
 export async function saveRecords(
   client: Client,
-  form: Form,
-  records: Record[],
+  form: Core.Form,
+  records: Core.Record[],
   comment?: string,
 ) {
   if (records.length === 0) {
@@ -186,8 +184,8 @@ export async function saveRecords(
 
 export async function deleteRecords(
   client: Client,
-  form: Form,
-  records: Record[],
+  form: Core.Form,
+  records: Core.Record[],
   comment?: string,
 ) {
   if (records.length === 0) {
@@ -202,12 +200,12 @@ export async function deleteRecords(
 export interface RecordOperation {
   type: 'create' | 'update' | 'delete';
   id?: string;
-  record?: Record;
+  record?: Core.Record;
 }
 
 export async function executeRecordOperatons(
   client: Client,
-  form: Form,
+  form: Core.Form,
   operations: RecordOperation[],
   comment?: string,
 ) {

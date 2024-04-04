@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import applyMixins from '../utils/mixin';
 import List from './actions/list';
 import Resource from './resource';
 
@@ -24,4 +25,5 @@ export default class Permission extends Resource {
   }
 }
 
-List.includeInto(Permission);
+interface Permission extends List {}
+applyMixins(Permission, [List]);

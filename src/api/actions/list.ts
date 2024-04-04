@@ -1,11 +1,10 @@
 // @ts-nocheck
 
-import Mixin from 'mixmatch';
 import Page from '../page';
 
 const DEFAULT_PER_PAGE = 1000;
 
-export default class List extends Mixin {
+export default class List {
   get defaultListParams() {
     return { per_page: DEFAULT_PER_PAGE };
   }

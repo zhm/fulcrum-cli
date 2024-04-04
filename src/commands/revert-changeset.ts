@@ -19,3 +19,10 @@ export const handler = async ({
 
   await revertChangeset(client, changesetId);
 };
+
+export default {
+  command,
+  description,
+  builder,
+  handler,
+};

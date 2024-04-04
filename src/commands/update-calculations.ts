@@ -47,3 +47,10 @@ export const handler = async ({
 
   await shutdownSandbox();
 };
+
+export default {
+  command,
+  description,
+  builder,
+  handler,
+};

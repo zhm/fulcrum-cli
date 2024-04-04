@@ -1,5 +1,5 @@
 import { last } from 'lodash';
-import { Record } from 'fulcrum-core';
+import Core from 'fulcrum-core';
 import Client from '../api/client';
 import {
   fetchChangeset,
@@ -30,13 +30,13 @@ export default async function revertChangeset(client: Client, changesetID: strin
           record_id: historyRecord.id,
         });
 
-        const currentVersion = last(allVersions);
+        const currentVersion = allVersions.slice(-1);
 
         const previousVersion = allVersions.find((o) => o.version === historyRecord.version - 1);
 
         operations.push({
           type: 'update',
-          record: new Record({
+          record: new Core.Record({
             ...previousVersion, version: currentVersion.version,
           }, form),
         });
@@ -54,7 +54,7 @@ export default async function revertChangeset(client: Client, changesetID: strin
       case 'd': {
         operations.push({
           type: 'create',
-          record: new Record({
+          record: new Core.Record({
             ...historyRecord,
             id: null,
           }, form),

@@ -1,8 +1,6 @@
 // @ts-nocheck
 
-import Mixin from 'mixmatch';
-
-export default class Delete extends Mixin {
+export default class Delete {
   async delete(id, object) {
     const options = {
       method: 'DELETE',

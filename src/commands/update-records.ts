@@ -86,3 +86,10 @@ export const handler = async ({
     comment ?? 'Updating records',
   );
 };
+
+export default {
+  command,
+  description,
+  builder,
+  handler,
+};

@@ -7,5 +7,5 @@ export NODE_OPTIONS='--max-old-space-size=16384'
 if [[ "${DIST:-0}" == "1" ]]; then
   node dist/index.js "$@"
 else
-  node_modules/.bin/ts-node src/index.ts "$@"
+  node_modules/.bin/tsx src/index.ts "$@"
 fi

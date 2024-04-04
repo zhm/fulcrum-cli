@@ -6,6 +6,7 @@ import Create from './actions/create';
 import Update from './actions/update';
 import Delete from './actions/delete';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class ChoiceList extends Resource {
   get resourceName() {
@@ -17,8 +18,5 @@ export default class ChoiceList extends Resource {
   }
 }
 
-List.includeInto(ChoiceList);
-Find.includeInto(ChoiceList);
-Create.includeInto(ChoiceList);
-Update.includeInto(ChoiceList);
-Delete.includeInto(ChoiceList);
+interface ChoiceList extends List, Find, Create, Update, Delete {}
+applyMixins(ChoiceList, [List, Find, Create, Update, Delete]);

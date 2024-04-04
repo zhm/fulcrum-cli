@@ -8,6 +8,7 @@ import Delete from './actions/delete';
 import History from './actions/history';
 import Resource from './resource';
 import Page from './page';
+import applyMixins from '../utils/mixin';
 
 export default class Record extends Resource {
   get resourceName() {
@@ -60,9 +61,5 @@ export default class Record extends Resource {
   }
 }
 
-List.includeInto(Record);
-Find.includeInto(Record);
-Create.includeInto(Record);
-Update.includeInto(Record);
-Delete.includeInto(Record);
-History.includeInto(Record);
+interface Record extends List, Find, Create, Update, Delete, History {}
+applyMixins(Record, [List, Find, Create, Update, Delete, History]);

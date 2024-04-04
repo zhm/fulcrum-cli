@@ -2,7 +2,13 @@
 
 import path from 'path';
 import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import { config } from 'dotenv-defaults';
+import deleteRecords from './commands/delete-records';
+import query from './commands/query';
+import revertChangeset from './commands/revert-changeset';
+import updateCalculations from './commands/update-calculations';
+import updateRecords from './commands/update-records';
 
 const loadDotEnvDefaultsMiddleware = () => {
   config({
@@ -13,7 +19,7 @@ const loadDotEnvDefaultsMiddleware = () => {
 };
 
 // eslint-disable-next-line no-unused-expressions
-yargs
+yargs(hideBin(process.argv))
   .scriptName('fulcrum')
   .middleware([
     loadDotEnvDefaultsMiddleware,
@@ -25,6 +31,11 @@ yargs
   .option('token', {
     describe: 'API token',
   })
-  .commandDir('./commands', { extensions: ['js', 'ts'] })
+  .command(deleteRecords)
+  .command(query)
+  .command(revertChangeset)
+  .command(updateCalculations)
+  .command(updateRecords)
+  // .commandDir('./commands', { extensions: ['js', 'ts'] })
   .demandCommand()
   .strict().argv;

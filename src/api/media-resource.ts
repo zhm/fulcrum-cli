@@ -1,10 +1,10 @@
 // @ts-nocheck
-
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import List from './actions/list';
 import Find from './actions/find';
 import Create from './actions/create';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class MediaResource extends Resource {
   optionsForUpload(file, attributes) {
@@ -15,7 +15,7 @@ export default class MediaResource extends Resource {
       files: {},
     };
 
-    options.fields[`${this.resourceName}[access_key]`] = attributes.access_key || uuid.v4();
+    options.fields[`${this.resourceName}[access_key]`] = attributes.access_key || uuidv4();
     options.files[`${this.resourceName}[file]`] = file;
 
     return options;
@@ -42,6 +42,5 @@ export default class MediaResource extends Resource {
   }
 }
 
-List.includeInto(MediaResource);
-Find.includeInto(MediaResource);
-Create.includeInto(MediaResource);
+interface MediaResource extends List, Find, Create {}
+applyMixins(MediaResource, [List, Find, Create]);

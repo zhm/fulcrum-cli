@@ -3,6 +3,7 @@
 import Resource from './resource';
 import List from './actions/list';
 import { ListResponse } from './types';
+import applyMixins from '../utils/mixin';
 
 export interface WorkflowExecution {
   id: string;
@@ -35,4 +36,5 @@ export default class WorkflowExecutionResource extends Resource {
   }
 }
 
-List.includeInto(WorkflowExecutionResource);
+interface WorkflowExecutionResource extends List {}
+applyMixins(WorkflowExecutionResource, [List]);

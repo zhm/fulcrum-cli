@@ -1,8 +1,6 @@
 // @ts-nocheck
 
-import Mixin from 'mixmatch';
-
-export default class Find extends Mixin {
+export default class Find {
   async find(id, params = {}) {
     const options = {
       method: 'GET',

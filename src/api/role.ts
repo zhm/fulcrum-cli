@@ -3,6 +3,7 @@
 import List from './actions/list';
 import Find from './actions/find';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Role extends Resource {
   get resourceName() {
@@ -14,5 +15,5 @@ export default class Role extends Resource {
   }
 }
 
-List.includeInto(Role);
-Find.includeInto(Role);
+interface Role extends List, Find {}
+applyMixins(Role, [List, Find]);

@@ -1,11 +1,12 @@
 import path from 'path';
 import fs from 'fs';
-import {
-  Record, Feature, FormValues, DateUtils, RepeatableValue, RepeatableItemValue,
-} from 'fulcrum-core';
+import Core from 'fulcrum-core';
 import { SandboxCluster } from 'v8-sandbox';
+import { fileURLToPath } from 'url';
 import { red, green, blue } from './log';
 import { Context } from './api';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const EXPRESSIONS = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'expressions.js')).toString();
 
@@ -32,7 +33,7 @@ export async function shutdownSandbox() {
   }
 }
 
-export async function updateCalculations(record: Record, context: Context) {
+export async function updateCalculations(record: Core.Record, context: Context) {
   console.log('updating calculations for record', record.id);
 
   await updateCalculationsRecursive(record, record, record.formValues, context);
@@ -54,9 +55,9 @@ function environmentFromEnvironmentVariables(): ExpressionEnvironment {
 }
 
 export async function updateCalculationsRecursive(
-  record: Record,
-  feature: Feature,
-  formValues: FormValues,
+  record: Core.Record,
+  feature: Core.Feature,
+  formValues: Core.FormValues,
   context: Context,
 ) {
   const runtimeVariables = getFeatureVariables(
@@ -95,7 +96,7 @@ export async function updateCalculationsRecursive(
   }
 
   for (const formValue of feature.formValues.all) {
-    if (formValue instanceof RepeatableValue) {
+    if (formValue instanceof Core.RepeatableValue) {
       for (const item of formValue.items) {
         const itemValues = item.formValues.copy();
 
@@ -146,13 +147,13 @@ const DEFAULT_ENVIRONMENT: ExpressionEnvironment = {
 };
 
 function getFeatureVariables(
-  record: Record,
-  feature: Feature,
-  formValues: FormValues,
+  record: Core.Record,
+  feature: Core.Feature,
+  formValues: Core.FormValues,
   context: Context,
   environment: ExpressionEnvironment,
 ) {
-  const repeatable = feature instanceof RepeatableItemValue ? feature.element : null;
+  const repeatable = feature instanceof Core.RepeatableItemValue ? feature.element : null;
   const container = repeatable ?? record.form;
 
   const expressions = container.elementsOfType('CalculatedField', false).map(((field) => ({
@@ -202,8 +203,8 @@ function getFeatureVariables(
     featureID: feature.id,
     featureIndex: feature.index,
     featureIsNew: feature.id == null,
-    featureCreatedAt: DateUtils.formatEpochTimestamp(feature.createdAt),
-    featureUpdatedAt: DateUtils.formatEpochTimestamp(feature.updatedAt),
+    featureCreatedAt: Core.DateUtils.formatEpochTimestamp(feature.createdAt),
+    featureUpdatedAt: Core.DateUtils.formatEpochTimestamp(feature.updatedAt),
     featureGeometry: feature.geometryAsGeoJSON,
 
     featureCreatedLatitude: feature.createdLatitude,

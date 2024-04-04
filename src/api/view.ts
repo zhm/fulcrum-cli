@@ -6,6 +6,7 @@ import Create from './actions/create';
 import Delete from './actions/delete';
 import Update from './actions/update';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class View extends Resource {
   get resourceName() {
@@ -17,8 +18,5 @@ export default class View extends Resource {
   }
 }
 
-List.includeInto(View);
-Find.includeInto(View);
-Create.includeInto(View);
-Update.includeInto(View);
-Delete.includeInto(View);
+interface View extends List, Find, Create, Update, Delete {}
+applyMixins(View, [List, Find, Create, Update, Delete]);

@@ -5,6 +5,7 @@ import Find from './actions/find';
 import Create from './actions/create';
 import Update from './actions/update';
 import Resource from './resource';
+import applyMixins from '../utils/mixin';
 
 export default class Changeset extends Resource {
   get resourceName() {
@@ -25,7 +26,6 @@ export default class Changeset extends Resource {
   }
 }
 
-List.includeInto(Changeset);
-Find.includeInto(Changeset);
-Create.includeInto(Changeset);
-Update.includeInto(Changeset);
+interface Changeset extends List, Find, Create, Update {}
+
+applyMixins(Changeset, [List, Find, Create, Update]);
