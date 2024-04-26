@@ -3,5 +3,9 @@
 # Installation
 
 ```sh
-npm install fulcrum-cli
+git clone https://github.com/zhm/fulcrum-cli.git
+
+cd fulcrum-cli
+
+./run
 ```
