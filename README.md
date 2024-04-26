@@ -7,6 +7,8 @@ git clone https://github.com/zhm/fulcrum-cli.git
 
 cd fulcrum-cli
 
+yarn install
+
 ./run
 
 fulcrum <command>
