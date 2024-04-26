@@ -5,6 +5,7 @@ import {
   fetchHistoryRecords,
 } from './api';
 import Client from '../api/client';
+import { blue } from './log';
 
 export default async function restoreForm(
   client: Client,
@@ -14,6 +15,8 @@ export default async function restoreForm(
   const deletedForm = await fetchDeletedForm(client, formID);
 
   const form = new Core.Form(await client.forms.create(deletedForm));
+
+  console.log('created new form', blue(form.name), blue(form.id));
 
   const params = {
     deleted_form_id: deletedForm.id,
@@ -39,6 +42,8 @@ export default async function restoreForm(
       record: new Core.Record(newRecord, form),
     });
   }
+
+  console.log('restoring', blue(operations.length), 'record(s)');
 
   await executeRecordOperatons(client, form, operations, 'Restoring records');
 }

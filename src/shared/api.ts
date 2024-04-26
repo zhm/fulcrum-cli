@@ -106,6 +106,8 @@ export async function fetchHistoryRecords(client: Client, params: any) {
     done = result.objects.length < perPage;
   }
 
+  console.log('fetched', blue(records.length), 'history record(s)');
+
   return records;
 }
 
