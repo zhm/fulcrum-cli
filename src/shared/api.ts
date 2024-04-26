@@ -90,13 +90,15 @@ export async function fetchRecord(client: Client, id: string, form: Core.Form) {
 export async function fetchHistoryRecords(client: Client, params: any) {
   console.log('fetching records', params);
 
-  const perPage = 1;
+  const perPage = 20000;
   const records = [];
 
   let page = 1;
   let done = false;
 
   while (!done) {
+    console.log('fetching records page', blue(page));
+
     const result = await client.records.history({ ...params, page });
 
     records.push(...result.objects);
