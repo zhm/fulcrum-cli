@@ -1,7 +1,7 @@
 import {
   Record, Form,
 } from 'fulcrum-core';
-import { executeRecordOperatons, RecordOperation, Context } from './api';
+import { executeRecordOperations, RecordOperation, Context } from './api';
 import { updateCalculations, shutdownSandbox } from './update-calculations';
 import Client from '../api/client';
 
@@ -29,7 +29,7 @@ export async function updateRecords(
     }
   }
 
-  await executeRecordOperatons(client, form, operations, comment);
+  await executeRecordOperations(client, form, operations, comment);
 
   await shutdownSandbox();
 }

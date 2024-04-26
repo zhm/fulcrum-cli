@@ -1,6 +1,6 @@
 import Core from 'fulcrum-core';
 import {
-  executeRecordOperatons,
+  executeRecordOperations,
   fetchDeletedForm,
   fetchHistoryRecords,
 } from './api';
@@ -45,5 +45,5 @@ export default async function restoreForm(
 
   console.log('restoring', blue(operations.length), 'record(s)');
 
-  await executeRecordOperatons(client, form, operations, 'Restoring records');
+  await executeRecordOperations(client, form, operations, 'Restoring records');
 }

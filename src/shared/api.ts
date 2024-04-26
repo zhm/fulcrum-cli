@@ -244,7 +244,7 @@ export interface RecordOperation {
   record?: Core.Record;
 }
 
-export async function executeRecordOperatons(
+export async function executeRecordOperations(
   client: Client,
   form: Core.Form,
   operations: RecordOperation[],
