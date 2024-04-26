@@ -1,7 +1,5 @@
-import {
-  createClient,
-} from '../shared/api';
-import { restoreForm } from '../shared/restore-form';
+import { createClient } from '../shared/api';
+import restoreForm from '../shared/restore-form';
 
 const command = 'restore-form';
 const description = 'Restore form and records';
@@ -27,7 +25,7 @@ const handler = async ({
 }) => {
   const client = createClient(endpoint, token);
 
-  await restoreForm(client, formID, date, null, null);
+  await restoreForm(client, formID, date);
 };
 
 export default {

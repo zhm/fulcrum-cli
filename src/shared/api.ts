@@ -3,7 +3,7 @@ import axios from 'axios';
 import queue from 'async/queue';
 import Core from 'fulcrum-core';
 import Client from '../api/client';
-import { red, green, blue } from './log';
+import { green, blue } from './log';
 
 export interface Organization {
   id: string;
@@ -109,7 +109,12 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   return records;
 }
 
-export async function fetchRecordsBySQL(client: Client, form: Core.Form, sql: string, where?: string) {
+export async function fetchRecordsBySQL(
+  client: Client,
+  form: Core.Form,
+  sql: string,
+  where?: string,
+) {
   console.log('fetching records by sql', sql, where);
 
   const query = where ? `${sql} WHERE ${where}` : sql;

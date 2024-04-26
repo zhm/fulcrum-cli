@@ -6,8 +6,7 @@ import {
 } from './api';
 import Client from '../api/client';
 
-// eslint-disable-next-line import/prefer-default-export
-export async function restoreForm(
+export default async function restoreForm(
   client: Client,
   formID: string,
   date: string,
