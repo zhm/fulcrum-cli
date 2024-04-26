@@ -7,6 +7,7 @@ import Update from './actions/update';
 import Delete from './actions/delete';
 import Resource from './resource';
 import applyMixins from '../utils/mixin';
+import Page from './page';
 
 export default class Form extends Resource {
   get resourceName() {
@@ -15,6 +16,18 @@ export default class Form extends Resource {
 
   get resourcesName() {
     return 'forms';
+  }
+
+  async history(params) {
+    const options = {
+      method: 'GET',
+      path: this.collectionAction('history'),
+      params,
+    };
+
+    const json = await this.call(options);
+
+    return new Page(json, this.resourcesName);
   }
 
   async systemApps() {

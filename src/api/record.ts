@@ -61,5 +61,5 @@ export default class Record extends Resource {
   }
 }
 
-interface Record extends List, Find, Create, Update, Delete, History {}
-applyMixins(Record, [List, Find, Create, Update, Delete, History]);
+interface Record extends List, Find, Create, Update, Delete {}
+applyMixins(Record, [List, Find, Create, Update, Delete]);

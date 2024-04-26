@@ -71,13 +71,45 @@ export async function fetchForm(client: Client, id: string) {
   return new Core.Form(await client.forms.find(id));
 }
 
-export async function fetchRecord(client: Client, id: string, form: Form) {
+export async function fetchDeletedForm(client: Client, id: string) {
+  console.log('fetching deleted form', id);
+
+  const history = await client.forms.history({ id });
+
+  const deleted = history.objects.find((o) => o.history_change_type === 'd');
+
+  return deleted;
+}
+
+export async function fetchRecord(client: Client, id: string, form: Core.Form) {
   console.log('fetching record', id);
 
   return new Core.Record(await client.records.find(id), form);
 }
 
-export async function fetchRecordsBySQL(client: Client, form: Form, sql: string, where?: string) {
+export async function fetchHistoryRecords(client: Client, params: any) {
+  console.log('fetching records', params);
+
+  const perPage = 1;
+  const records = [];
+
+  let page = 1;
+  let done = false;
+
+  while (!done) {
+    const result = await client.records.history({ ...params, page });
+
+    records.push(...result.objects);
+
+    page += 1;
+
+    done = result.objects.length < perPage;
+  }
+
+  return records;
+}
+
+export async function fetchRecordsBySQL(client: Client, form: Core.Form, sql: string, where?: string) {
   console.log('fetching records by sql', sql, where);
 
   const query = where ? `${sql} WHERE ${where}` : sql;

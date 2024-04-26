@@ -9,6 +9,7 @@ import query from './commands/query';
 import revertChangeset from './commands/revert-changeset';
 import updateCalculations from './commands/update-calculations';
 import updateRecords from './commands/update-records';
+import restoreForm from './commands/restore-form';
 
 const loadDotEnvDefaultsMiddleware = () => {
   config({
@@ -36,6 +37,7 @@ yargs(hideBin(process.argv))
   .command(revertChangeset)
   .command(updateCalculations)
   .command(updateRecords)
+  .command(restoreForm)
   // .commandDir('./commands', { extensions: ['js', 'ts'] })
   .demandCommand()
   .strict().argv;
