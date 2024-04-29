@@ -1,9 +1,13 @@
 import http from 'http';
 import axios from 'axios';
+import path from 'path';
+import fs from 'fs';
 import queue from 'async/queue';
 import Core from 'fulcrum-core';
+import { mkdirp } from 'mkdirp';
+import { fileFromPath } from 'formdata-node/file-from-path';
 import Client from '../api/client';
-import { green, blue } from './log';
+import { green, blue, red } from './log';
 
 export interface Organization {
   id: string;
@@ -18,11 +22,17 @@ export interface Context {
 
 export type BatchOperationCallback = (object: any) => Promise<any>;
 
+export type RecordProcessor = (record: Core.Record) => Promise<any>;
+
 export type ChangesetOperationCallback = (changeset: Core.Changeset) => Promise<any>;
 
 export async function batch(objects: any[], callback: BatchOperationCallback) {
   const q = queue(async (task) => {
-    await callback(task);
+    try {
+      await callback(task);
+    } catch (ex) {
+      console.error(red('error'), ex.message);
+    }
   }, process.env.FULCRUM_BATCH_SIZE ?? 15);
 
   q.push(objects);
@@ -109,6 +119,32 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   }
 
   console.log('fetched', blue(records.length), 'history record(s)');
+
+  return records;
+}
+
+export async function fetchRecords(client: Client, params: any) {
+  console.log('fetching records', params);
+
+  const perPage = 20000;
+  const records = [];
+
+  let page = 1;
+  let done = false;
+
+  while (!done) {
+    console.log('fetching records page', blue(page));
+
+    const result = await client.records.all({ ...params, page });
+
+    records.push(...result.objects);
+
+    page += 1;
+
+    done = result.objects.length < perPage;
+  }
+
+  console.log('fetched', blue(records.length), 'record(s)');
 
   return records;
 }
@@ -244,22 +280,137 @@ export interface RecordOperation {
   record?: Core.Record;
 }
 
-export async function executeRecordOperations(
+export async function executeRecordOperations({
+  client,
+  form,
+  operations,
+  comment,
+  beforeUpdate,
+  afterUpdate,
+}: {
   client: Client,
   form: Core.Form,
   operations: RecordOperation[],
   comment?: string,
-) {
+  beforeUpdate?: RecordProcessor,
+  afterUpdate?: RecordProcessor,
+}) {
   if (operations.length === 0) {
     return;
   }
 
-  const update = (changeset) => batch(operations, (operation) => {
-    if (operation.type === 'delete') {
-      return deleteRecord(client, operation.id, changeset);
+  const update = (changeset) => batch(operations, async (operation) => {
+    if (beforeUpdate) {
+      await beforeUpdate(operation.record);
     }
-    return saveRecord(client, operation.record, changeset);
+
+    let result = null;
+
+    if (operation.type === 'delete') {
+      result = deleteRecord(client, operation.id, changeset);
+    } else {
+      result = saveRecord(client, operation.record, changeset);
+    }
+
+    if (afterUpdate) {
+      await afterUpdate(operation.record);
+    }
+
+    return result;
   });
 
   await withChangeset(client, form, comment, update);
+}
+
+export async function duplicateMedia(
+  type: string,
+  mediaID: string,
+  find: (id: string) => Promise<any>,
+  create: (file: any, attributes: any) => Promise<any>,
+) {
+  const object = await find(mediaID);
+
+  await mkdirp('tmp');
+
+  const downloadPath = path.join('tmp', object.access_key);
+
+  console.log('downloading', type, blue(object.access_key), 'to', green(downloadPath));
+
+  await download(object.original, downloadPath);
+
+  const file = await fileFromPath(downloadPath);
+
+  const newObject = await create(file, {});
+
+  console.log('created', type, blue(newObject.access_key));
+
+  return newObject;
+}
+
+export async function duplicatePhoto(client: Client, mediaID: string) {
+  return duplicateMedia(
+    'photo',
+    mediaID,
+    (id) => client.photos.find(id),
+    (file, attributes) => client.photos.create(file, attributes),
+  );
+}
+
+export async function duplicateAudio(client: Client, mediaID: string) {
+  return duplicateMedia(
+    'audio',
+    mediaID,
+    (id) => client.audio.find(id),
+    (file, attributes) => client.audio.create(file, attributes),
+  );
+}
+
+export async function duplicateVideo(client: Client, mediaID: string) {
+  return duplicateMedia(
+    'video',
+    mediaID,
+    (id) => client.videos.find(id),
+    (file, attributes) => client.videos.create(file, attributes),
+  );
+}
+
+export async function duplicateSignature(client: Client, mediaID: string) {
+  return duplicateMedia(
+    'signature',
+    mediaID,
+    (id) => client.signatures.find(id),
+    (file, attributes) => client.signatures.create(file, attributes),
+  );
+}
+
+export async function download(url, outputFileName) {
+  return new Promise(async (resolve, reject) => {
+    const destStream = fs.createWriteStream(outputFileName);
+
+    try {
+      const config = {
+        method: 'GET',
+        url,
+        responseType: 'stream',
+        headers: {},
+      };
+
+      await axios(config)
+        .then((res) => new Promise((resolve, reject) => {
+          res.data.pipe(destStream);
+          destStream
+            .on('error', (err) => {
+              reject({ response: { statusText: err.message } }); // Use same shape as axios error
+            })
+            .on('close', () => {
+              resolve();
+            });
+        }));
+
+      resolve();
+    } catch (err) {
+      destStream.close();
+      reject(err);
+    }
+  });
 }

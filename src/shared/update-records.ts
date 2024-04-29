@@ -29,7 +29,9 @@ export async function updateRecords(
     }
   }
 
-  await executeRecordOperations(client, form, operations, comment);
+  await executeRecordOperations({
+    client, form, operations, comment,
+  });
 
   await shutdownSandbox();
 }

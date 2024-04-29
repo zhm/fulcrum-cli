@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
 import List from './actions/list';
 import Find from './actions/find';
 import Create from './actions/create';
@@ -8,15 +9,17 @@ import applyMixins from '../utils/mixin';
 
 export default class MediaResource extends Resource {
   optionsForUpload(file, attributes) {
+    const data = new FormData();
+
+    data.append(`${this.resourceName}[access_key]`, attributes.access_key || uuidv4());
+    data.append(`${this.resourceName}[file]`, file);
+
     const options = {
       method: 'POST',
       path: this.createAction,
-      fields: {},
-      files: {},
+      'Content-Type': 'multipart/form-data',
+      data,
     };
-
-    options.fields[`${this.resourceName}[access_key]`] = attributes.access_key || uuidv4();
-    options.files[`${this.resourceName}[file]`] = file;
 
     return options;
   }
