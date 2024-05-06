@@ -5,7 +5,9 @@ export const command = 'revert-changeset';
 export const description = 'Revert a changeset';
 export const builder = (yargs) => {
   yargs
-    .option('changesetId', {
+    .option('changeset', {
+      required: true,
+      alias: 'c',
       type: 'string',
       description: 'Changeset ID',
     })
