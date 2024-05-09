@@ -3,7 +3,7 @@ import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 import queue from 'async/queue';
-import Core from 'fulcrum-core';
+import Core, { Form, Record } from 'fulcrum-core';
 import { mkdirp } from 'mkdirp';
 import { fileFromPath } from 'formdata-node/file-from-path';
 import Client from '../api/client';
@@ -412,5 +412,51 @@ export async function download(url, outputFileName) {
       destStream.close();
       reject(err);
     }
+  });
+}
+
+export async function createRecords(client: Client, records: Record[], form: Form) {
+  const operations = [];
+
+  for (const attrs of records) {
+    const newRecord = {
+      ...attrs,
+      id: null,
+      version: null,
+      form_id: form.id,
+    };
+
+    operations.push({
+      action: 'create',
+      record: new Core.Record(newRecord, form),
+    });
+  }
+
+  console.log('creating', blue(operations.length), 'record(s)');
+
+  const copyMedia = async (record: Core.Record) => {
+    await batch(record.formValues.mediaValues, async (item) => {
+      if (item.mediaKey === 'photo_id') {
+        const object = await duplicatePhoto(client, item.mediaID);
+
+        item.mediaID = object.access_key;
+      } else if (item.mediaKey === 'audio_id') {
+        const object = await duplicateAudio(client, item.mediaID);
+
+        item.mediaID = object.access_key;
+      } else if (item.mediaKey === 'video_id') {
+        const object = await duplicateVideo(client, item.mediaID);
+
+        item.mediaID = object.access_key;
+      } else if (item instanceof Core.SignatureValue) {
+        const object = await duplicateSignature(client, item.id);
+
+        item.id = object.access_key;
+      }
+    });
+  };
+
+  await executeRecordOperations({
+    client, form, operations, comment: `Creating records in ${form.name}`, beforeUpdate: copyMedia,
   });
 }

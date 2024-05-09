@@ -11,6 +11,7 @@ import updateCalculations from './commands/update-calculations';
 import updateRecords from './commands/update-records';
 import restoreForm from './commands/restore-form';
 import duplicateForm from './commands/duplicate-form';
+import duplicateRecords from './commands/duplicate-records';
 
 const loadDotEnvDefaultsMiddleware = () => {
   config({
@@ -40,6 +41,7 @@ yargs(hideBin(process.argv))
   .command(updateRecords)
   .command(restoreForm)
   .command(duplicateForm)
+  .command(duplicateRecords)
   // .commandDir('./commands', { extensions: ['js', 'ts'] })
   .demandCommand()
   .strict().argv;
