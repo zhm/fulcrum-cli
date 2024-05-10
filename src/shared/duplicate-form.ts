@@ -1,6 +1,6 @@
 import Core from 'fulcrum-core';
 import {
-  duplicateRecordsWithMedia,
+  createRecords,
   fetchForm,
   fetchRecords,
 } from './api';
@@ -19,10 +19,7 @@ export default async function duplicateForm(
 
   const records = await fetchRecords(client, { form_id: existingForm.id });
 
-  await duplicateRecordsWithMedia(
-    client,
-    records,
-    form,
-    `Duplicating records from ${existingForm.name} (${existingForm.id})`,
-  );
+  await createRecords(client, records, form);
+
+  console.log('finished duplicating form');
 }

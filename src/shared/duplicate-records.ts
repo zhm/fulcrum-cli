@@ -1,19 +1,22 @@
 import Core from 'fulcrum-core';
 import {
-  duplicateRecordsWithMedia,
-  fetchRecords,
+  createRecords,
+  fetchRecordsBySQL,
 } from './api';
 import Client from '../api/client';
 import { blue } from './log';
 
 export default async function duplicateRecords(
   client: Client,
-  sourceFormID: string,
-  destinationFormID: string,
+  originID: string,
+  destinationID: string,
+  sql: string,
 ) {
-  console.log('fetching records from source form', blue(sourceFormID));
+  console.log('getting records from origin', blue(originID), 'with sql query of', blue(sql ?? `select * from "${originID}"`));
 
-  const records = await fetchRecords(client, { form_id: sourceFormID });
+  const originForm = new Core.Form(await client.forms.find(originID));
+
+  const records = await fetchRecordsBySQL(client, originForm, sql ?? `select * from "${originID}"`);
 
   console.log('fetching destination form', blue(destinationFormID));
 
@@ -21,10 +24,7 @@ export default async function duplicateRecords(
 
   console.log('creating', blue(records.length), 'record(s)');
 
-  await duplicateRecordsWithMedia(
-    client,
-    records,
-    destinationForm,
-    `Duplicating records from ${sourceFormID})`,
-  );
+  await createRecords(client, records, destinationForm);
+
+  console.log('finished creating records');
 }
