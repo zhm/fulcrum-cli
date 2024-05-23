@@ -1,14 +1,9 @@
-import path from 'path';
-import fs from 'fs';
 import Core from 'fulcrum-core';
 import { SandboxCluster } from 'v8-sandbox';
-import { fileURLToPath } from 'url';
 import { red, green, blue } from './log';
 import { Context } from './api';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const EXPRESSIONS = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'expressions.js')).toString();
+import EXPRESSIONS from '../../resources/expressions.json';
 
 const SCRIPT = `
   Object.assign($$runtime, global.runtimeVariables);
