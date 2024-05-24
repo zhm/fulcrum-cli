@@ -325,4 +325,13 @@ export default class Client {
     }
     return this._workflowExecutions;
   }
+
+  get externalContributions() {
+    if (!this._externalContributions) {
+      // @ts-ignore
+      this._externalContributions = new ExternalContributionsApiClient(this.config.external_contributions_url, this.token);
+    }
+
+    return this._externalContributions;
+  }
 }

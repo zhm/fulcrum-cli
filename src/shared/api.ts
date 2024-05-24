@@ -123,7 +123,7 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   return records;
 }
 
-export async function fetchRecords(client: Client, params: any) {
+export async function fetchRecords(client: Client, params: any): Promise<object[]> {
   const perPage = 5000;
   const records = [];
 
@@ -152,7 +152,7 @@ export async function fetchRecordsBySQL(
   form: Core.Form,
   sql: string,
   where?: string,
-) {
+): Promise<Core.Record[]> {
   console.log('fetching records by sql', sql, where);
 
   const query = where ? `${sql} WHERE ${where}` : sql;
@@ -407,12 +407,7 @@ export async function download(url, outputFileName) {
   });
 }
 
-export async function duplicateRecordsWithMedia(
-  client: Client,
-  records: Record[],
-  form: Form,
-  comment: string,
-) {
+export async function duplicateRecordsWithMedia(client: Client, records: Object[], form: Form, comment: string) {
   const operations = [];
 
   for (const attrs of records) {
