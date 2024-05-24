@@ -23,6 +23,7 @@ Commands:
   fulcrum update-records       Update records
   fulcrum restore-form         Restore form and records
   fulcrum duplicate-form       Duplicate form and records
+  fulcrum duplicate-records    Duplicate records into new app
 
 Options:
   --help      Show help                                                [boolean]
