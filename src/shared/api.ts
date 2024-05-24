@@ -415,7 +415,7 @@ export async function download(url, outputFileName) {
   });
 }
 
-export async function createRecords(client: Client, records: Object[], form: Form) {
+export async function createRecords(client: Client, records: Object[], form: Form, comment: string) {
   const operations = [];
 
   for (const attrs of records) {

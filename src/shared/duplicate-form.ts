@@ -19,7 +19,7 @@ export default async function duplicateForm(
 
   const records = await fetchRecords(client, { form_id: existingForm.id });
 
-  await createRecords(client, records, form);
+  await createRecords(client, records, form, `duplicated from form ${formID}`);
 
   console.log('finished duplicating form');
 }
