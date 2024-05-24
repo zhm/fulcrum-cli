@@ -9,31 +9,24 @@ export default class Resource {
     return this.client.call(options);
   }
 
-  modifier(name, format = 'json') {
-    return `${name}.${format}`;
+  ext(format) {
+    return format ? `.${format}` : '';
   }
 
-  collection(format = 'json') {
-    return `${this.resourcesName}.${format}`;
+  collection(format) {
+    return `${this.resourcesName}${this.ext(format)}`;
   }
 
-  collectionAction(name, format: string | null = 'json') {
-    if (format != null) {
-      return `${this.resourcesName}/${name}.${format}`;
-    }
-    return `${this.resourcesName}/${name}`;
+  collectionAction(name, format: string | null) {
+    return `${this.resourcesName}/${name}${this.ext(format)}`;
   }
 
-  member(id, format = 'json') {
-    return `${this.resourcesName}/${id}.${format}`;
+  member(id, format) {
+    return `${this.resourcesName}/${id}${this.ext(format)}`;
   }
 
-  memberAction(id, action, format = 'json') {
-    if (format != null) {
-      return `${this.resourcesName}/${id}/${action}.${format}`;
-    }
-
-    return `${this.resourcesName}/${id}/${action}`;
+  memberAction(id, action, format) {
+    return `${this.resourcesName}/${id}/${action}${this.ext(format)}`;
   }
 
   attributesForObject(object) {

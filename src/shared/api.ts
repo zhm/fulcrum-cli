@@ -1,7 +1,7 @@
 import http from 'http';
 import axios from 'axios';
 import path from 'path';
-import fs from 'fs';
+import fs from 'node:fs/promises';
 import queue from 'async/queue';
 import Core, { Form, Record } from 'fulcrum-core';
 import { mkdirp } from 'mkdirp';
@@ -126,7 +126,7 @@ export async function fetchHistoryRecords(client: Client, params: any) {
 export async function fetchRecords(client: Client, params: any) {
   console.log('fetching records', params);
 
-  const perPage = 20000;
+  const perPage = 5000;
   const records = [];
 
   let page = 1;
@@ -464,4 +464,40 @@ export async function duplicateRecordsWithMedia(
   await executeRecordOperations({
     client, form, operations, comment, beforeUpdate: copyMedia,
   });
+}
+
+export async function deleteAttachmentsByName(
+  client: Client,
+  formID: string,
+  name: string,
+) {
+  const attachments = await client.attachments.all({ owner_type: 'form', form_id: formID });
+
+  const existing = attachments.objects.filter((attachment) => attachment.name === name);
+
+  await batch(existing, async (attachment) => {
+    console.log('deleting attachment', blue(name), green(attachment.id));
+
+    return client.attachments.delete(attachment.id);
+  });
+}
+
+export async function createAttachment(
+  client: Client,
+  formID: string,
+  filePath: string,
+  name: string,
+) {
+  const attachment = {
+    name,
+    owners: [{ type: 'form', id: formID }],
+    file_size: (await fs.stat(filePath)).size,
+    metadata: {
+      filename: name,
+    },
+  };
+
+  console.log('creating attachment', blue(name), 'from', green(filePath));
+
+  return client.attachments.create(attachment, filePath);
 }
