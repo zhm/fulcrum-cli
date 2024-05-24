@@ -12,6 +12,7 @@ import { CommandArguments, CommandHandler, defineCommand } from './command';
 
 interface Arguments extends CommandArguments {
   sql: string;
+  where: string;
   form: string;
   comment: string;
 }
@@ -23,6 +24,12 @@ export const builder: CommandBuilder = (yargs) => yargs
     alias: 'sql',
     type: 'string',
     description: 'SQL query',
+  })
+  .option('where', {
+    alias: 'w',
+    type: 'string',
+    default: '',
+    description: 'SQL where clause',
   })
   .option('form', {
     required: true,
@@ -37,7 +44,7 @@ export const builder: CommandBuilder = (yargs) => yargs
   .strict(false);
 
 export const handler: CommandHandler<Arguments> = async ({
-  endpoint, token, sql, form: formID, comment,
+  endpoint, token, sql, form: formID, comment, where,
 }) => {
   const client = createClient(endpoint, token);
 
@@ -45,7 +52,7 @@ export const handler: CommandHandler<Arguments> = async ({
 
   const form = await fetchForm(client, formID);
 
-  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`);
+  const records = await fetchRecordsBySQL(client, form, sql, where);
 
   await batch(records, (record) => updateCalculations(record, context));
 

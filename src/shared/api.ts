@@ -83,6 +83,12 @@ export async function fetchForm(client: Client, id: string) {
   return new Core.Form(await client.forms.find(id));
 }
 
+export async function deleteForm(client: Client, form: Core.Form) {
+  console.log('deleting form', blue(form.id));
+
+  await client.forms.delete(form.id);
+}
+
 export async function fetchDeletedForm(client: Client, id: string) {
   console.log('fetching deleted form', id);
 
@@ -123,7 +129,11 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   return records;
 }
 
-export async function fetchRecords(client: Client, params: any) {
+export async function fetchRecords(
+  client: Client,
+  form: Core.Form,
+  params?: any,
+) {
   const perPage = 5000;
   const records = [];
 
@@ -133,9 +143,9 @@ export async function fetchRecords(client: Client, params: any) {
   while (!done) {
     console.log('fetching records page', blue(page));
 
-    const result = await client.records.all({ ...params, page });
+    const result = await client.records.all({ ...{ form_id: form.id, ...params }, page });
 
-    records.push(...result.objects);
+    records.push(...result.objects.map((attrs) => new Core.Record(attrs, form)));
 
     page += 1;
 
@@ -150,12 +160,14 @@ export async function fetchRecords(client: Client, params: any) {
 export async function fetchRecordsBySQL(
   client: Client,
   form: Core.Form,
-  sql: string,
+  sql?: string,
   where?: string,
 ) {
   console.log('fetching records by sql', sql, where);
 
-  const query = where ? `${sql} WHERE ${where}` : sql;
+  const select = sql ?? `select * from "${form.id}"`;
+
+  const query = where ? `${select} WHERE ${where}` : select;
 
   const result = await client.query.run({ q: query });
 
@@ -409,15 +421,15 @@ export async function download(url, outputFileName) {
 
 export async function duplicateRecordsWithMedia(
   client: Client,
-  records: Record[],
-  form: Form,
+  records: Core.Record[],
+  form: Core.Form,
   comment: string,
 ) {
   const operations = [];
 
-  for (const attrs of records) {
+  for (const record of records) {
     const newRecord = {
-      ...attrs,
+      ...record.toJSON(),
       id: null,
       version: null,
       form_id: form.id,

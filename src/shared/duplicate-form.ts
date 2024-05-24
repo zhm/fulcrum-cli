@@ -25,7 +25,7 @@ export default async function duplicateForm(
   await duplicateWorkflows(client, existingForm.id, form.id);
 
   if (duplicateRecords) {
-    const records = await fetchRecords(client, { form_id: existingForm.id });
+    const records = await fetchRecords(client, existingForm);
 
     await duplicateRecordsWithMedia(
       client,

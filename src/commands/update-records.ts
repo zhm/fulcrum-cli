@@ -61,7 +61,7 @@ export const handler: CommandHandler<Arguments> = async ({
 
   const form = await fetchForm(client, formID);
 
-  const records = await fetchRecordsBySQL(client, form, sql ?? `select * from "${formID}"`, where);
+  const records = await fetchRecordsBySQL(client, form, sql, where);
 
   if (field && field.length !== value.length) {
     console.error('Must pass the same number of fields and values');
