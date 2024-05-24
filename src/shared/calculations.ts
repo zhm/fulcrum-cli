@@ -76,19 +76,22 @@ export async function updateCalculationsRecursive(
       const element = record.form.get(result.key);
 
       const formValue = feature.formValues.createValue(element, result.value);
+      const currentValue = feature.formValues.get(element.key);
 
-      console.log(
-        'record',
-        blue(record.id),
-        'updating calculation',
-        blue(element.dataName),
-        'from',
-        red(feature.formValues.get(element.key)?.textValue ?? '[Blank]'),
-        'to',
-        green(formValue.textValue),
-      );
+      if (!currentValue || !formValue.isEqual(currentValue.textValue)) {
+        console.log(
+          'record',
+          blue(record.id),
+          'updating calculation',
+          blue(element.dataName),
+          'from',
+          red(currentValue?.textValue ?? '[Blank]'),
+          'to',
+          green(formValue.textValue),
+        );
 
-      feature.formValues.set(element.key, formValue);
+        feature.formValues.set(element.key, formValue);
+      }
     }
   }
 
