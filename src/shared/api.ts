@@ -163,11 +163,11 @@ export async function fetchRecordsBySQL(
   sql?: string,
   where?: string,
 ) {
-  console.log('fetching records by sql', sql, where);
-
-  const select = sql ?? `select * from "${form.id}"`;
+  const select = sql ?? `SELECT * FROM "${form.id}"`;
 
   const query = where ? `${select} WHERE ${where}` : select;
+
+  console.log('fetching records by sql', blue(query));
 
   const result = await client.query.run({ q: query });
 
