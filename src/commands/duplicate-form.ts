@@ -5,6 +5,7 @@ import { CommandArguments, CommandHandler, defineCommand } from './command';
 
 interface Arguments extends CommandArguments {
   form: string;
+  records: boolean;
 }
 
 const command = 'duplicate-form';
@@ -16,14 +17,21 @@ const builder: CommandBuilder = (yargs) => yargs
     type: 'string',
     description: 'Form ID to duplicate',
   })
+  .option('records', {
+    required: true,
+    alias: 'r',
+    type: 'boolean',
+    default: true,
+    description: 'Duplicate records after duplicating the form',
+  })
   .strict(false);
 
 const handler: CommandHandler<Arguments> = async ({
-  endpoint, token, form: formID,
+  endpoint, token, form: formID, records,
 }) => {
   const client = createClient(endpoint, token);
 
-  await duplicateForm(client, formID);
+  await duplicateForm(client, formID, records);
 };
 
 export default defineCommand({

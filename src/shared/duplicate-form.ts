@@ -1,28 +1,37 @@
-import Core from 'fulcrum-core';
 import {
+  duplicateFormSchema,
+  duplicateFormImage,
   duplicateRecordsWithMedia,
+  duplicateReferenceFiles,
+  duplicateWorkflows,
   fetchForm,
   fetchRecords,
 } from './api';
 import Client from '../api/client';
-import { blue } from './log';
 
 export default async function duplicateForm(
   client: Client,
   formID: string,
+  duplicateRecords: boolean,
 ) {
   const existingForm = await fetchForm(client, formID);
 
-  const form = new Core.Form(await client.forms.create(existingForm));
+  const form = await duplicateFormSchema(client, existingForm);
 
-  console.log('created new form', blue(form.name), blue(form.id));
+  await duplicateFormImage(client, existingForm, form.id);
 
-  const records = await fetchRecords(client, { form_id: existingForm.id });
+  await duplicateReferenceFiles(client, existingForm.id, form.id);
 
-  await duplicateRecordsWithMedia(
-    client,
-    records,
-    form,
-    `Duplicating records from ${existingForm.name} (${existingForm.id})`,
-  );
+  await duplicateWorkflows(client, existingForm.id, form.id);
+
+  if (duplicateRecords) {
+    const records = await fetchRecords(client, { form_id: existingForm.id });
+
+    await duplicateRecordsWithMedia(
+      client,
+      records,
+      form,
+      `Duplicating records from ${existingForm.name} (${existingForm.id})`,
+    );
+  }
 }
