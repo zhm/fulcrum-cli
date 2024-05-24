@@ -1,27 +1,33 @@
 import { stringify } from 'csv-stringify/sync';
+import { Argv, CommandBuilder } from 'yargs';
 import { createClient } from '../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from './command';
 
-export const command = 'query';
-export const description = 'Run query';
-export const builder = (yargs) => {
-  yargs
-    .option('sql', {
-      required: true,
-      alias: 'sql',
-      type: 'string',
-      description: 'SQL query',
-    })
-    .option('format', {
-      required: true,
-      default: 'json',
-      alias: 'f',
-      type: 'string',
-      description: 'Format, json or csv',
-    })
-    .strict(false);
-};
+interface Arguments extends CommandArguments {
+  sql: string;
+  format: 'json' | 'csv';
+}
 
-export const handler = async ({
+const command = 'query';
+const description = 'Run query';
+const builder: CommandBuilder = (yargs): Argv => yargs
+  .option('sql', {
+    required: true,
+    alias: 'sql',
+    type: 'string',
+    description: 'SQL query',
+  })
+  .option('format', {
+    required: true,
+    default: 'json',
+    alias: 'f',
+    type: 'string',
+    choices: ['json', 'csv'],
+    description: 'Format, json or csv',
+  })
+  .strict(false);
+
+const handler: CommandHandler<Arguments> = async ({
   endpoint, token, sql, format,
 }) => {
   const client = createClient(endpoint, token);
@@ -35,9 +41,9 @@ export const handler = async ({
   );
 };
 
-export default {
+export default defineCommand({
   command,
   description,
   builder,
   handler,
-};
+});

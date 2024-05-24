@@ -42,6 +42,5 @@ yargs(hideBin(process.argv))
   .command(updateRecords)
   .command(restoreForm)
   .command(duplicateForm)
-  // .commandDir('./commands', { extensions: ['js', 'ts'] })
   .demandCommand()
   .strict().argv;
