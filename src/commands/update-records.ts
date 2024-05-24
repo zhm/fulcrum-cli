@@ -50,10 +50,6 @@ export const builder: CommandBuilder = (yargs) => yargs
     type: 'string',
     description: 'Comment',
   })
-  .option('script', {
-    type: 'string',
-    description: 'Script file to execute',
-  })
   .strict(false);
 
 export const handler: CommandHandler<Arguments> = async ({
@@ -72,25 +68,10 @@ export const handler: CommandHandler<Arguments> = async ({
     return;
   }
 
-  const results = [];
-
-  if (script) {
-    // eslint-disable-next-line global-require
-    const mod = require(script);
-
-    for (const record of records) {
-      const result = await mod.processRecord(record);
-
-      if (result) {
-        results.push(result);
-      }
-    }
-  }
-
   await updateRecordFields(
     client,
     form,
-    results,
+    records,
     context,
     field ?? [],
     value ?? [],
