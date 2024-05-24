@@ -7,7 +7,6 @@ import { config } from 'dotenv-defaults';
 import deleteRecords from './commands/delete-records';
 import query from './commands/query';
 import revertChangeset from './commands/revert-changeset';
-import updateCalculations from './commands/update-calculations';
 import updateRecords from './commands/update-records';
 import restoreForm from './commands/restore-form';
 import duplicateForm from './commands/duplicate-form';
@@ -41,7 +40,6 @@ yargs(hideBin(process.argv))
   .command(deleteRecords)
   .command(query)
   .command(revertChangeset)
-  .command(updateCalculations)
   .command(updateRecords)
   .command(restoreForm)
   .command(duplicateForm)

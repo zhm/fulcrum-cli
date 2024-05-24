@@ -1,7 +1,7 @@
 import { CommandBuilder } from 'yargs';
-import fs from 'node:fs/promises';
-import { createAttachment, createClient, deleteAttachmentsByName } from '../shared/api';
+import { createClient } from '../shared/api';
 import { CommandArguments, CommandHandler, defineCommand } from './command';
+import { createAttachment, deleteAttachmentsByName } from '../shared/attachments';
 
 interface Arguments extends CommandArguments {
   form: string;

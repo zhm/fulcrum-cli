@@ -1,7 +1,8 @@
 import { CommandBuilder } from 'yargs';
 import { createClient } from '../shared/api';
-import duplicateRecords from '../shared/duplicate-records';
 import { CommandArguments, CommandHandler, defineCommand } from './command';
+import duplicateRecords from '../shared/records';
+import { fetchForm } from '../shared/forms';
 
 interface Arguments extends CommandArguments {
   source: string;
@@ -43,7 +44,10 @@ const handler: CommandHandler<Arguments> = async ({
 }) => {
   const client = createClient(endpoint, token);
 
-  await duplicateRecords(client, source, destination, sql, where);
+  const sourceForm = await fetchForm(client, source);
+  const destinationForm = await fetchForm(client, destination);
+
+  await duplicateRecords(client, sourceForm, destinationForm, sql, where);
 };
 
 export default defineCommand({

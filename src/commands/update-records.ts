@@ -1,12 +1,11 @@
 import { CommandBuilder } from 'yargs';
 import {
   createClient,
-  fetchForm,
   fetchContext,
-  fetchRecordsBySQL,
 } from '../shared/api';
-import { updateRecordFields } from '../shared/update-records';
 import { CommandArguments, CommandHandler, defineCommand } from './command';
+import { fetchRecordsBySQL, updateRecordFields } from '../shared/records';
+import { fetchForm } from '../shared/forms';
 
 interface Arguments extends CommandArguments {
   sql: string;

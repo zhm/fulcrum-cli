@@ -1,10 +1,7 @@
 import { CommandBuilder } from 'yargs';
-import {
-  createClient,
-  deleteForm,
-  fetchForm,
-} from '../shared/api';
+import { createClient } from '../shared/api';
 import { CommandArguments, CommandHandler, defineCommand } from './command';
+import { deleteForm, fetchForm } from '../shared/forms';
 
 interface Arguments extends CommandArguments {
   form: string;

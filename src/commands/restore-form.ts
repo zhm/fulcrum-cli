@@ -1,7 +1,7 @@
 import { CommandBuilder } from 'yargs';
 import { createClient } from '../shared/api';
-import restoreForm from '../shared/restore-form';
 import { CommandArguments, CommandHandler, defineCommand } from './command';
+import { restoreForm } from '../shared/forms';
 
 interface Arguments extends CommandArguments {
   form: string;
