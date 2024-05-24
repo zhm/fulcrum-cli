@@ -17,14 +17,15 @@ export default async function duplicateRecords(
   const originForm = new Core.Form(await client.forms.find(originID));
 
   const records = await fetchRecordsBySQL(client, originForm, sql ?? `select * from "${originID}"`);
+  const recordJSONs = records.map((record) => record.toJSON());
 
   console.log('fetching destination form', blue(destinationFormID));
 
   const destinationForm = new Core.Form(await client.forms.find(destinationFormID));
 
-  console.log('creating', blue(records.length), 'record(s)');
+  console.log('creating', blue(recordJSONs.length), 'record(s)');
 
-  await createRecords(client, records, destinationForm);
+  await createRecords(client, recordJSONs, destinationForm);
 
   console.log('finished creating records');
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+// @ts-nocheck
 import path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
