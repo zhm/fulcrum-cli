@@ -23,7 +23,6 @@ import ReportTemplate from './report-template';
 import Workflow from './workflow';
 import User from './user';
 import WorkflowExecution from './workflow_execution';
-import ExternalContributionsApiClient from './external-contributions-api-client';
 
 export interface Config {
   query_url: string;
@@ -91,8 +90,6 @@ export default class Client {
 
   _workflowExecutions: any;
 
-  _externalContributions: any;
-
   constructor(options) {
     this.request = options.request;
     this.token = options.token;
@@ -133,9 +130,9 @@ export default class Client {
         })
         .catch((error) => {
           if (error.response) {
-            console.error('Request Error', error.message, error.response.status, error.response.data);
+            console.error('<http>', error.message, error.response.status, error.response.data);
           } else {
-            console.error('Request Error', error.message);
+            console.error('<http>', error.message);
           }
 
           reject(error);
@@ -322,13 +319,5 @@ export default class Client {
       this._workflowExecutions = new WorkflowExecution(this);
     }
     return this._workflowExecutions;
-  }
-
-  get externalContributions() {
-    if (!this._externalContributions) {
-      this._externalContributions = new ExternalContributionsApiClient(this.config.external_contributions_url, this.token);
-    }
-
-    return this._externalContributions;
   }
 }

@@ -201,9 +201,9 @@ export async function fetchChangeset(client: Client, id: string) {
 }
 
 export async function createChangeset(client: Client, form: Core.Form, comment?: string) {
-  console.log('creating changeset', blue(form.id), green(comment));
-
   const json = await client.changesets.create(buildChangesetAttributes(form, comment));
+
+  console.log('created changeset', blue(json.id), green(comment));
 
   return new Core.Changeset(json);
 }
@@ -222,7 +222,7 @@ export async function deleteRecord(client: Client, id: string, changeset?: Core.
 export async function saveRecord(client: Client, record: Core.Record, changeset?: Core.Changeset) {
   record.changeset = changeset;
 
-  console.log(`${record.id ? 'updating' : 'creating'} record`, blue(record.id));
+  console.log(`${record.version ? 'updating' : 'creating'} record`, blue(record.id));
 
   const json = await client.records.create(record.toJSON());
 
@@ -415,7 +415,12 @@ export async function download(url, outputFileName) {
   });
 }
 
-export async function createRecords(client: Client, records: Record[], form: Form) {
+export async function duplicateRecordsWithMedia(
+  client: Client,
+  records: Record[],
+  form: Form,
+  comment: string,
+) {
   const operations = [];
 
   for (const attrs of records) {
@@ -432,7 +437,7 @@ export async function createRecords(client: Client, records: Record[], form: For
     });
   }
 
-  console.log('creating', blue(operations.length), 'record(s)');
+  console.log('duplicating', blue(operations.length), 'record(s)');
 
   const copyMedia = async (record: Core.Record) => {
     await batch(record.formValues.mediaValues, async (item) => {
@@ -457,6 +462,6 @@ export async function createRecords(client: Client, records: Record[], form: For
   };
 
   await executeRecordOperations({
-    client, form, operations, comment: `Creating records in ${form.name}`, beforeUpdate: copyMedia,
+    client, form, operations, comment, beforeUpdate: copyMedia,
   });
 }

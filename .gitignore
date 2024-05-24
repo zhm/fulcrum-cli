@@ -7,3 +7,4 @@ bench/*.db
 report.*
 output.log
 tmp/
+fulcrum

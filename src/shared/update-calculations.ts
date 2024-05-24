@@ -1,14 +1,9 @@
-import path from 'path';
-import fs from 'fs';
 import Core from 'fulcrum-core';
 import { SandboxCluster } from 'v8-sandbox';
-import { fileURLToPath } from 'url';
 import { red, green, blue } from './log';
 import { Context } from './api';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const EXPRESSIONS = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'expressions.js')).toString();
+import EXPRESSIONS from '../../resources/expressions.json';
 
 const SCRIPT = `
   Object.assign($$runtime, global.runtimeVariables);
@@ -47,7 +42,9 @@ function environmentFromEnvironmentVariables(): ExpressionEnvironment {
     ...(env.FULCRUM_LANGUAGE ? { language: env.FULCRUM_LANGUAGE } : {}),
     ...(env.FULCRUM_TIMEZONE ? { timeZone: env.FULCRUM_TIMEZONE } : {}),
     ...(env.FULCRUM_DECIMAL_SEPARATOR ? { decimalSeparator: env.FULCRUM_DECIMAL_SEPARATOR } : {}),
-    ...(env.FULCRUM_GROUPING_SEPARATOR ? { groupingSeparator: env.FULCRUM_GROUPING_SEPARATOR } : {}),
+    ...(env.FULCRUM_GROUPING_SEPARATOR ? {
+      groupingSeparator: env.FULCRUM_GROUPING_SEPARATOR,
+    } : {}),
     ...(env.FULCRUM_CURRENCY_SYMBOL ? { currencySymbol: env.FULCRUM_CURRENCY_SYMBOL } : {}),
     ...(env.FULCRUM_GROUPING_CODE ? { currencyCode: env.FULCRUM_GROUPING_CODE } : {}),
     ...(env.FULCRUM_COUNTRY ? { currencyCode: env.FULCRUM_COUNTRY } : {}),

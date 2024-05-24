@@ -1,13 +1,6 @@
 import Core from 'fulcrum-core';
 import {
-  batch,
-  createRecords,
-  duplicateAudio,
-  duplicatePhoto,
-  duplicateSignature,
-  duplicateVideo,
-  executeRecordOperations,
-  fetchForm,
+  duplicateRecordsWithMedia,
   fetchRecords,
 } from './api';
 import Client from '../api/client';
@@ -15,20 +8,23 @@ import { blue } from './log';
 
 export default async function duplicateRecords(
   client: Client,
-  originID: string,
-  destinationID: string,
+  sourceFormID: string,
+  destinationFormID: string,
 ) {
-  console.log('getting records from origin', blue(originID));
+  console.log('fetching records from source form', blue(sourceFormID));
 
-  const records = await fetchRecords(client, { form_id: originID });
+  const records = await fetchRecords(client, { form_id: sourceFormID });
 
-  console.log('getting destination form', blue(destinationID));
+  console.log('fetching destination form', blue(destinationFormID));
 
-  const destinationForm = new Core.Form(await client.forms.find(destinationID));
+  const destinationForm = new Core.Form(await client.forms.find(destinationFormID));
 
   console.log('creating', blue(records.length), 'record(s)');
 
-  await createRecords(client, records, destinationForm);
-
-  console.log('COMPLETE!');
+  await duplicateRecordsWithMedia(
+    client,
+    records,
+    destinationForm,
+    `Duplicating records from ${sourceFormID})`,
+  );
 }

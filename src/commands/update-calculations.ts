@@ -1,3 +1,4 @@
+import { CommandBuilder } from 'yargs';
 import {
   createClient,
   fetchForm,
@@ -7,30 +8,35 @@ import {
   batch,
 } from '../shared/api';
 import { updateCalculations, shutdownSandbox } from '../shared/update-calculations';
+import { CommandArguments, CommandHandler, defineCommand } from './command';
+
+interface Arguments extends CommandArguments {
+  sql: string;
+  form: string;
+  comment: string;
+}
 
 export const command = 'update-calculations';
 export const description = 'Update calculation fields';
-export const builder = (yargs) => {
-  yargs
-    .option('sql', {
-      alias: 'sql',
-      type: 'string',
-      description: 'SQL query',
-    })
-    .option('form', {
-      required: true,
-      alias: 'f',
-      type: 'string',
-      description: 'Form ID',
-    })
-    .option('comment', {
-      type: 'string',
-      description: 'Comment',
-    })
-    .strict(false);
-};
+export const builder: CommandBuilder = (yargs) => yargs
+  .option('sql', {
+    alias: 'sql',
+    type: 'string',
+    description: 'SQL query',
+  })
+  .option('form', {
+    required: true,
+    alias: 'f',
+    type: 'string',
+    description: 'Form ID',
+  })
+  .option('comment', {
+    type: 'string',
+    description: 'Comment',
+  })
+  .strict(false);
 
-export const handler = async ({
+export const handler: CommandHandler<Arguments> = async ({
   endpoint, token, sql, form: formID, comment,
 }) => {
   const client = createClient(endpoint, token);
@@ -48,9 +54,9 @@ export const handler = async ({
   await shutdownSandbox();
 };
 
-export default {
+export default defineCommand({
   command,
   description,
   builder,
   handler,
-};
+});

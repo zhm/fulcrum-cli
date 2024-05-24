@@ -24,6 +24,7 @@ const loadDotEnvDefaultsMiddleware = () => {
 // eslint-disable-next-line no-unused-expressions
 yargs(hideBin(process.argv))
   .scriptName('fulcrum')
+  .env('FULCRUM')
   .middleware([
     loadDotEnvDefaultsMiddleware,
   ])
@@ -32,6 +33,7 @@ yargs(hideBin(process.argv))
     describe: 'API endpoint',
   })
   .option('token', {
+    required: true,
     describe: 'API token',
   })
   .command(deleteRecords)
@@ -42,6 +44,5 @@ yargs(hideBin(process.argv))
   .command(restoreForm)
   .command(duplicateForm)
   .command(duplicateRecords)
-  // .commandDir('./commands', { extensions: ['js', 'ts'] })
   .demandCommand()
   .strict().argv;

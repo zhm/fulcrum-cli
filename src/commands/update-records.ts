@@ -1,3 +1,4 @@
+import { CommandBuilder } from 'yargs';
 import {
   createClient,
   fetchForm,
@@ -5,48 +6,57 @@ import {
   fetchRecordsBySQL,
 } from '../shared/api';
 import { updateRecordFields } from '../shared/update-records';
+import { CommandArguments, CommandHandler, defineCommand } from './command';
+
+interface Arguments extends CommandArguments {
+  sql: string;
+  where: string;
+  form: string;
+  field: string[];
+  value: string[];
+  comment: string;
+  script: string;
+}
 
 export const command = 'update-records';
 export const description = 'Update records';
-export const builder = (yargs) => {
-  yargs
-    .option('sql', {
-      alias: 'sql',
-      type: 'string',
-      description: 'SQL query',
-    })
-    .option('where', {
-      alias: 'w',
-      type: 'string',
-      default: '',
-      description: 'SQL where clause',
-    })
-    .option('form', {
-      required: true,
-      alias: 'f',
-      type: 'string',
-      description: 'Form ID',
-    })
-    .option('field', {
-      type: 'array',
-      description: 'Field data name',
-    })
-    .option('value', {
-      type: 'array',
-      description: 'Field value',
-    })
-    .option('comment', {
-      type: 'string',
-      description: 'Comment',
-    })
-    .option('script', {
-      type: 'string',
-      description: 'Script file to execute',
-    })
-    .strict(false);
-};
+export const builder: CommandBuilder = (yargs) => yargs
+  .option('sql', {
+    alias: 'sql',
+    type: 'string',
+    description: 'SQL query',
+  })
+  .option('where', {
+    alias: 'w',
+    type: 'string',
+    default: '',
+    description: 'SQL where clause',
+  })
+  .option('form', {
+    required: true,
+    alias: 'f',
+    type: 'string',
+    description: 'Form ID',
+  })
+  .option('field', {
+    type: 'array',
+    description: 'Field data name',
+  })
+  .option('value', {
+    type: 'array',
+    description: 'Field value',
+  })
+  .option('comment', {
+    type: 'string',
+    description: 'Comment',
+  })
+  .option('script', {
+    type: 'string',
+    description: 'Script file to execute',
+  })
+  .strict(false);
 
-export const handler = async ({
+export const handler: CommandHandler<Arguments> = async ({
   endpoint, token, sql, form: formID, comment, field, value, where, script,
 }) => {
   const client = createClient(endpoint, token);
@@ -65,6 +75,7 @@ export const handler = async ({
   const results = [];
 
   if (script) {
+    // eslint-disable-next-line global-require
     const mod = require(script);
 
     for (const record of records) {
@@ -87,9 +98,9 @@ export const handler = async ({
   );
 };
 
-export default {
+export default defineCommand({
   command,
   description,
   builder,
   handler,
-};
+});
