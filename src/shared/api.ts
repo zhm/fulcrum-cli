@@ -6,6 +6,8 @@ import queue from 'async/queue';
 import Core, { Form, Record } from 'fulcrum-core';
 import { mkdirp } from 'mkdirp';
 import { fileFromPath } from 'formdata-node/file-from-path';
+import { randomUUID } from 'crypto';
+import { filesize } from 'filesize';
 import Client from '../api/client';
 import { green, blue, red } from './log';
 
@@ -98,8 +100,6 @@ export async function fetchRecord(client: Client, id: string, form: Core.Form) {
 }
 
 export async function fetchHistoryRecords(client: Client, params: any) {
-  console.log('fetching records', params);
-
   const perPage = 20000;
   const records = [];
 
@@ -123,10 +123,8 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   return records;
 }
 
-export async function fetchRecords(client: Client, params: any): Promise<Object[]> {
-  console.log('fetching records', params);
-
-  const perPage = 20000;
+export async function fetchRecords(client: Client, params: any): Promise<object[]> {
+  const perPage = 5000;
   const records = [];
 
   let page = 1;
@@ -330,21 +328,15 @@ export async function duplicateMedia(
 ) {
   const object = await find(mediaID);
 
-  await mkdirp('tmp');
+  return withDownloadedFile(object.original, async (filePath) => {
+    const file = await fileFromPath(filePath);
 
-  const downloadPath = path.join('tmp', object.access_key);
+    const newObject = await create(file, {});
 
-  console.log('downloading', type, blue(object.access_key), 'to', green(downloadPath));
+    console.log('created', type, blue(newObject.access_key));
 
-  await download(object.original, downloadPath);
-
-  const file = await fileFromPath(downloadPath);
-
-  const newObject = await create(file, {});
-
-  console.log('created', type, blue(newObject.access_key));
-
-  return newObject;
+    return newObject;
+  });
 }
 
 export async function duplicatePhoto(client: Client, mediaID: string) {
@@ -415,7 +407,7 @@ export async function download(url, outputFileName) {
   });
 }
 
-export async function createRecords(client: Client, records: Object[], form: Form, comment: string) {
+export async function duplicateRecordsWithMedia(client: Client, records: Object[], form: Form, comment: string) {
   const operations = [];
 
   for (const attrs of records) {
@@ -459,4 +451,146 @@ export async function createRecords(client: Client, records: Object[], form: For
   await executeRecordOperations({
     client, form, operations, comment, beforeUpdate: copyMedia,
   });
+}
+
+export async function deleteAttachmentsByName(
+  client: Client,
+  formID: string,
+  name: string,
+) {
+  const attachments = await client.attachments.all({ owner_type: 'form', form_id: formID });
+
+  const existing = attachments.objects.filter((attachment) => attachment.name === name);
+
+  await batch(existing, async (attachment) => {
+    console.log('deleting attachment', blue(name), green(attachment.id));
+
+    return client.attachments.delete(attachment.id);
+  });
+}
+
+export async function createAttachment(
+  client: Client,
+  formID: string,
+  filePath: string,
+  name: string,
+) {
+  const attachment = {
+    name,
+    owners: [{ type: 'form', id: formID }],
+    file_size: (await fs.promises.stat(filePath)).size,
+    metadata: {
+      filename: name,
+    },
+  };
+
+  console.log('creating attachment', blue(name), red(filesize(attachment.file_size)));
+
+  return client.attachments.create(attachment, filePath);
+}
+
+export async function withDownloadedFile(
+  url: string,
+  process: (filePath: string) => Promise<any>,
+): Promise<any> {
+  let filePath = null;
+
+  try {
+    filePath = await downloadFile(url);
+
+    const result = await process(filePath);
+
+    return result;
+  } finally {
+    if (filePath) {
+      await fs.promises.unlink(filePath);
+    }
+  }
+}
+
+export async function downloadFile(
+  url: string,
+) {
+  await mkdirp('tmp');
+
+  const downloadPath = path.join('tmp', randomUUID());
+
+  // console.log('downloading file', blue(url), 'to', green(downloadPath));
+
+  await download(url, downloadPath);
+
+  return downloadPath;
+}
+
+export async function duplicateReferenceFiles(
+  client: Client,
+  sourceFormID: string,
+  destinationFormID: string,
+) {
+  const attachments = await client.attachments.all({ owner_type: 'form', form_id: sourceFormID });
+
+  await batch(attachments.objects, async (attachment) => {
+    await withDownloadedFile(attachment.url, async (filePath) => {
+      await createAttachment(client, destinationFormID, filePath, attachment.name);
+    });
+  });
+}
+
+export async function duplicateFormImage(
+  client: Client,
+  sourceForm: Core.Form,
+  destinationFormID: string,
+) {
+  if (sourceForm.image) {
+    await withDownloadedFile(sourceForm.image, async (filePath) => {
+      const file = await fileFromPath(filePath);
+
+      await client.forms.uploadImage(destinationFormID, file);
+    });
+  }
+}
+
+export async function duplicateWorkflows(
+  client: Client,
+  sourceFormID: string,
+  destinationFormID: string,
+) {
+  const workflows = await client.workflows.all({ form_id: sourceFormID });
+
+  const filtered = workflows.objects.filter((w) => w.object_resource_id === sourceFormID);
+
+  for (const workflow of filtered) {
+    const idMap = {};
+
+    for (const step of workflow.steps) {
+      idMap[step.id] = randomUUID();
+    }
+
+    for (const step of workflow.steps) {
+      step.id = idMap[step.id];
+      step.next_steps = step.next_steps.map((nextStepId) => idMap[nextStepId]);
+    }
+
+    const newWorkflow = {
+      ...workflow,
+      id: null,
+      object_resource_id: destinationFormID,
+      active: false,
+    };
+
+    console.log('creating workflow', blue(newWorkflow.name));
+
+    await client.workflows.create(newWorkflow);
+  }
+}
+
+export async function duplicateFormSchema(
+  client: Client,
+  form: Core.Form,
+) {
+  const newForm = new Core.Form(await client.forms.create(form));
+
+  console.log('created new form', blue(newForm.name), blue(newForm.id));
+
+  return newForm;
 }

@@ -30,6 +30,21 @@ export default class Form extends Resource {
     return new Page(json, this.resourcesName);
   }
 
+  async uploadImage(id, file) {
+    const data = new FormData();
+
+    data.append('[form][image]', file);
+
+    const options = {
+      method: 'POST',
+      path: this.memberAction(id, 'upload_image', null),
+      'Content-Type': 'multipart/form-data',
+      data,
+    };
+
+    return this.call(options);
+  }
+
   async systemApps() {
     const options = {
       method: 'GET',

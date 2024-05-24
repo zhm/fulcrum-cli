@@ -12,6 +12,7 @@ import updateRecords from './commands/update-records';
 import restoreForm from './commands/restore-form';
 import duplicateForm from './commands/duplicate-form';
 import duplicateRecords from './commands/duplicate-records';
+import uploadReferenceFile from './commands/upload-reference-file';
 
 const loadDotEnvDefaultsMiddleware = () => {
   config({
@@ -44,5 +45,6 @@ yargs(hideBin(process.argv))
   .command(restoreForm)
   .command(duplicateForm)
   .command(duplicateRecords)
+  .command(uploadReferenceFile)
   .demandCommand()
   .strict().argv;

@@ -120,9 +120,14 @@ export default class Client {
     }
 
     if (this.token) {
-      options.params.token = this.token;
+      options.headers['X-ApiToken'] = this.token;
     }
 
+    return this.execute(options);
+  }
+
+  execute(options) {
+    // console.log('<http>', options.method, options.url, options.params, options.headers, options.data);
     return new Promise((resolve, reject) => {
       this.request(options)
         .then((response) => {
