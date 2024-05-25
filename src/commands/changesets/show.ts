@@ -7,7 +7,7 @@ interface Arguments extends CommandArguments {
   changeset: string;
 }
 
-export const command = 'show';
+export const command = 'changesets show';
 
 export const description = 'Show a changeset';
 

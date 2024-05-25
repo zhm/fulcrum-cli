@@ -7,7 +7,7 @@ interface Arguments extends CommandArguments {
   changeset: string;
 }
 
-export const command = 'revert';
+export const command = 'changesets revert';
 
 export const description = 'Revert a changeset';
 

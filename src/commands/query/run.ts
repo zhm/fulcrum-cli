@@ -8,7 +8,7 @@ interface Arguments extends CommandArguments {
   format: 'json' | 'csv';
 }
 
-const command = 'run';
+const command = 'query run';
 
 const description = 'Run query';
 
