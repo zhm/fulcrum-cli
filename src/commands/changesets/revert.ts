@@ -1,14 +1,16 @@
 import { CommandBuilder } from 'yargs';
-import { createClient } from '../shared/api';
-import { CommandArguments, CommandHandler, defineCommand } from './command';
-import { fetchChangeset, revertChangeset } from '../shared/changesets';
+import { createClient } from '../../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from '../command';
+import { fetchChangeset, revertChangeset } from '../../shared/changesets';
 
 interface Arguments extends CommandArguments {
   changeset: string;
 }
 
-export const command = 'revert-changeset';
+export const command = 'revert';
+
 export const description = 'Revert a changeset';
+
 export const builder: CommandBuilder = (yargs) => yargs
   .option('changeset', {
     required: true,

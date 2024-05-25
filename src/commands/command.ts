@@ -15,7 +15,7 @@ type Command<T extends CommandArguments> = {
   command: string;
   description: string;
   builder: CommandBuilder;
-  handler: CommandHandler<T>;
+  handler?: CommandHandler<T>;
 };
 
 export function defineCommand<T extends CommandArguments>(cmd: Command<T>) {

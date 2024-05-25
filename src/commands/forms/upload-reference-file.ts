@@ -1,7 +1,7 @@
 import { CommandBuilder } from 'yargs';
-import { createClient } from '../shared/api';
-import { CommandArguments, CommandHandler, defineCommand } from './command';
-import { createAttachment, deleteAttachmentsByName } from '../shared/attachments';
+import { createClient } from '../../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from '../command';
+import { createAttachment, deleteAttachmentsByName } from '../../shared/attachments';
 
 interface Arguments extends CommandArguments {
   form: string;
@@ -10,7 +10,9 @@ interface Arguments extends CommandArguments {
 }
 
 const command = 'upload-reference-file';
+
 const description = 'Upload a Reference File';
+
 const builder: CommandBuilder = (yargs) => yargs
   .option('form', {
     required: true,

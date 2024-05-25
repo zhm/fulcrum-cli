@@ -1,8 +1,8 @@
 import { CommandBuilder } from 'yargs';
-import { createClient } from '../shared/api';
-import { CommandArguments, CommandHandler, defineCommand } from './command';
-import { fetchForm } from '../shared/forms';
-import { deleteRecords, fetchRecordsBySQL } from '../shared/records';
+import { createClient } from '../../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from '../command';
+import { fetchForm } from '../../shared/forms';
+import { deleteRecords, fetchRecordsBySQL } from '../../shared/records';
 
 interface Arguments extends CommandArguments {
   sql: string;
@@ -11,7 +11,7 @@ interface Arguments extends CommandArguments {
   comment: string;
 }
 
-const command = 'delete-records';
+const command = 'delete';
 const description = 'Delete records';
 const builder: CommandBuilder = (yargs) => yargs
   .option('sql', {

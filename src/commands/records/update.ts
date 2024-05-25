@@ -2,10 +2,10 @@ import { CommandBuilder } from 'yargs';
 import {
   createClient,
   fetchContext,
-} from '../shared/api';
-import { CommandArguments, CommandHandler, defineCommand } from './command';
-import { fetchRecordsBySQL, updateRecordFields } from '../shared/records';
-import { fetchForm } from '../shared/forms';
+} from '../../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from '../command';
+import { fetchRecordsBySQL, updateRecordFields } from '../../shared/records';
+import { fetchForm } from '../../shared/forms';
 
 interface Arguments extends CommandArguments {
   sql: string;
@@ -17,7 +17,7 @@ interface Arguments extends CommandArguments {
   script: string;
 }
 
-export const command = 'update-records';
+export const command = 'update';
 export const description = 'Update records';
 export const builder: CommandBuilder = (yargs) => yargs
   .option('sql', {

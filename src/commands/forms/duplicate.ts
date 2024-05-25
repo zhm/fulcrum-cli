@@ -1,15 +1,17 @@
 import { CommandBuilder } from 'yargs';
-import { createClient } from '../shared/api';
-import { CommandArguments, CommandHandler, defineCommand } from './command';
-import duplicateForm, { fetchForm } from '../shared/forms';
+import { createClient } from '../../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from '../command';
+import duplicateForm, { fetchForm } from '../../shared/forms';
 
 interface Arguments extends CommandArguments {
   form: string;
   records: boolean;
 }
 
-const command = 'duplicate-form';
+const command = 'duplicate';
+
 const description = 'Duplicate form and records';
+
 const builder: CommandBuilder = (yargs) => yargs
   .option('form', {
     required: true,

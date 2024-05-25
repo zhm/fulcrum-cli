@@ -1,8 +1,8 @@
 import { CommandBuilder } from 'yargs';
-import { createClient } from '../shared/api';
-import { CommandArguments, CommandHandler, defineCommand } from './command';
-import duplicateRecords from '../shared/records';
-import { fetchForm } from '../shared/forms';
+import { createClient } from '../../shared/api';
+import { CommandArguments, CommandHandler, defineCommand } from '../command';
+import duplicateRecords from '../../shared/records';
+import { fetchForm } from '../../shared/forms';
 
 interface Arguments extends CommandArguments {
   source: string;
@@ -11,7 +11,7 @@ interface Arguments extends CommandArguments {
   where: string;
 }
 
-const command = 'duplicate-records';
+const command = 'duplicate';
 const description = 'Duplicate records into new app';
 const builder: CommandBuilder = (yargs) => yargs
   .option('source', {

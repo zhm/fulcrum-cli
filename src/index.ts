@@ -4,15 +4,10 @@ import path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { config } from 'dotenv-defaults';
-import deleteRecords from './commands/delete-records';
 import query from './commands/query';
-import revertChangeset from './commands/revert-changeset';
-import updateRecords from './commands/update-records';
-import restoreForm from './commands/restore-form';
-import duplicateForm from './commands/duplicate-form';
-import duplicateRecords from './commands/duplicate-records';
-import uploadReferenceFile from './commands/upload-reference-file';
-import deleteForm from './commands/delete-form';
+import records from './commands/records';
+import forms from './commands/forms';
+import changesets from './commands/changesets';
 
 const loadDotEnvDefaultsMiddleware = () => {
   config({
@@ -37,14 +32,9 @@ yargs(hideBin(process.argv))
     required: true,
     describe: 'API token',
   })
-  .command(deleteRecords)
+  .command(records)
+  .command(forms)
   .command(query)
-  .command(revertChangeset)
-  .command(updateRecords)
-  .command(restoreForm)
-  .command(duplicateForm)
-  .command(duplicateRecords)
-  .command(uploadReferenceFile)
-  .command(deleteForm)
+  .command(changesets)
   .demandCommand()
   .strict().argv;
