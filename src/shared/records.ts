@@ -10,15 +10,21 @@ import {
   duplicateVideo,
 } from './attachments';
 import { shutdownSandbox, updateCalculations } from './calculations';
+import { fetchForm } from './forms';
 
 export type RecordProcessor = (record: Core.Record) => Promise<any>;
 
 export type RecordOperationCallback = (record: Core.Record) => Promise<RecordOperation | null>;
 
-export async function fetchRecord(client: Client, id: string, form: Core.Form) {
+export async function fetchRecord(client: Client, id: string, form?: Core.Form) {
   console.log('fetching record', id);
 
-  return new Core.Record(await client.records.find(id), form);
+  const json = await client.records.find(id);
+
+  return new Core.Record(
+    json,
+    form ?? await fetchForm(client, json.form_id),
+  );
 }
 
 export async function fetchHistoryRecords(client: Client, params: any) {
