@@ -8,7 +8,7 @@ interface Arguments extends CommandArguments {
   friendly: boolean;
 }
 
-export const command = 'records show';
+export const command = 'show';
 
 export const description = 'Show record';
 

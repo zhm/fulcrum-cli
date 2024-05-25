@@ -8,7 +8,7 @@ interface Arguments extends CommandArguments {
   records: boolean;
 }
 
-const command = 'forms duplicate';
+const command = 'duplicate';
 
 const description = 'Duplicate form and records';
 

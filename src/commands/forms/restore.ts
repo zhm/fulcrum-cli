@@ -8,7 +8,7 @@ interface Arguments extends CommandArguments {
   date: string;
 }
 
-const command = 'forms restore';
+const command = 'restore';
 
 const description = 'Restore form and records';
 

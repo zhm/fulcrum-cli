@@ -11,8 +11,10 @@ interface Arguments extends CommandArguments {
   where: string;
 }
 
-const command = 'records duplicate';
+const command = 'duplicate';
+
 const description = 'Duplicate records into new app';
+
 const builder: CommandBuilder = (yargs) => yargs
   .option('source', {
     required: true,

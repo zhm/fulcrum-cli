@@ -7,7 +7,7 @@ interface Arguments extends CommandArguments {
   form: string;
 }
 
-const command = 'forms delete';
+const command = 'delete';
 
 const description = 'Delete form';
 

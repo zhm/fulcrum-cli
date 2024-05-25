@@ -9,7 +9,7 @@ interface Arguments extends CommandArguments {
   name: string;
 }
 
-const command = 'forms upload-reference-file';
+const command = 'upload-reference-file';
 
 const description = 'Upload a Reference File';
 

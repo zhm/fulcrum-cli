@@ -17,8 +17,10 @@ interface Arguments extends CommandArguments {
   script: string;
 }
 
-export const command = 'records update';
+export const command = 'update';
+
 export const description = 'Update records';
+
 export const builder: CommandBuilder = (yargs) => yargs
   .option('sql', {
     alias: 'sql',

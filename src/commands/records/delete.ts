@@ -11,8 +11,10 @@ interface Arguments extends CommandArguments {
   comment: string;
 }
 
-const command = 'records delete';
+const command = 'delete';
+
 const description = 'Delete records';
+
 const builder: CommandBuilder = (yargs) => yargs
   .option('sql', {
     alias: 'sql',
