@@ -30,6 +30,7 @@ import Workflow from './workflow';
 import Report from './report';
 import User from './user';
 import WorkflowExecution from './workflow_execution';
+import { log } from '../utils/logger';
 
 export interface Config {
   query_url: string;
@@ -137,18 +138,13 @@ export default class Client {
   }
 
   executeRequest(options: AxiosRequestConfig) {
-    // console.log('<http>', options.method, options.url, options.params, options.headers, options.data);
     return new Promise((resolve, reject) => {
       axios(options)
         .then((response) => {
           resolve(response.data);
         })
         .catch((error) => {
-          if (error.response) {
-            console.error('<http>', error.message, error.response.status, error.response.data);
-          } else {
-            console.error('<http>', error.message);
-          }
+          this.logError(error, options, error.response);
 
           reject(error);
         });
@@ -172,6 +168,8 @@ export default class Client {
 
             destStream
               .on('error', (err) => {
+                this.logError(err, requestOptions, response);
+
                 reject({ response: { statusText: err.message } }); // Use same shape as axios error
               })
               .on('close', () => {
@@ -185,6 +183,14 @@ export default class Client {
         reject(err);
       }
     });
+  }
+
+  logError(error: any, options: AxiosRequestConfig, response: AxiosResponse | null) {
+    if (response) {
+      log.error({ context: 'http' }, error.message, options.url, error.response.status, error.response.data);
+    } else {
+      log.error({ context: 'http' }, error.message, options.url);
+    }
   }
 
   get apiHeaders() {

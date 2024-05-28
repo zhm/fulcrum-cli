@@ -8,6 +8,7 @@ import { mkdirp } from 'mkdirp';
 import { randomUUID } from 'crypto';
 import Client from '../api/client';
 import { red } from './log';
+import { Logger, log } from '../utils/logger';
 
 export interface Organization {
   id: string;
@@ -26,7 +27,7 @@ export async function batch(objects: any[], callback: BatchOperationCallback) {
     try {
       await callback(task);
     } catch (ex) {
-      console.error(red('error'), ex.message);
+      log.error(red('error'), ex.message);
     }
   }, process.env.FULCRUM_BATCH_SIZE ?? 15);
 
@@ -52,7 +53,7 @@ export function createClient(endpoint: string, token: string) {
 }
 
 export async function fetchContext(client: Client): Promise<Context> {
-  console.log('fetching context');
+  log.info('fetching context');
 
   const json = await client.user.find();
 

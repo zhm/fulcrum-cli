@@ -6,6 +6,7 @@ import {
 import { CommandArguments, CommandHandler, defineCommand } from '../command';
 import { fetchRecordsBySQL, updateRecordFields } from '../../shared/records';
 import { fetchForm } from '../../shared/forms';
+import { log } from '../../utils/logger';
 
 interface Arguments extends CommandArguments {
   sql: string;
@@ -65,7 +66,7 @@ export const handler: CommandHandler<Arguments> = async ({
   const records = await fetchRecordsBySQL(client, form, sql, where);
 
   if (field && field.length !== value.length) {
-    console.error('Must pass the same number of fields and values');
+    log.error('Must pass the same number of fields and values');
     return;
   }
 

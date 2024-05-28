@@ -7,21 +7,22 @@ import {
 } from './records';
 import { duplicateReferenceFiles } from './attachments';
 import { duplicateWorkflows } from './workflows';
+import { log } from '../utils/logger';
 
 export async function fetchForm(client: Client, id: string) {
-  console.log('fetching form', id);
+  log.info('fetching form');
 
   return new Core.Form(await client.forms.find(id));
 }
 
 export async function deleteForm(client: Client, form: Core.Form) {
-  console.log('deleting form', blue(form.id));
+  log.info('deleting form', blue(form.id));
 
   await client.forms.delete(form.id);
 }
 
 export async function fetchDeletedForm(client: Client, id: string) {
-  console.log('fetching deleted form', id);
+  log.info('fetching deleted form', id);
 
   const history = await client.forms.history({ id });
 
@@ -50,7 +51,7 @@ export async function duplicateFormSchema(
 ) {
   const newForm = new Core.Form(await client.forms.create(form));
 
-  console.log('created new form', blue(newForm.name), blue(newForm.id));
+  log.info('created new form', blue(newForm.name), blue(newForm.id));
 
   return newForm;
 }
@@ -64,7 +65,7 @@ export async function restoreForm(
 
   const form = new Core.Form(await client.forms.create(deletedForm));
 
-  console.log('created new form', blue(form.name), blue(form.id));
+  log.info('created new form', blue(form.name), blue(form.id));
 
   const params = {
     deleted_form_id: deletedForm.id,
@@ -91,7 +92,7 @@ export async function restoreForm(
     });
   }
 
-  console.log('restoring', blue(operations.length), 'record(s)');
+  log.info('restoring', blue(operations.length), 'record(s)');
 
   await executeRecordOperations({
     client, form, operations, comment: 'Restoring records',

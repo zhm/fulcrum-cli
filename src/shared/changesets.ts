@@ -3,6 +3,7 @@ import Client from '../api/client';
 import { green, blue } from './log';
 import { fetchForm } from './forms';
 import { deleteRecord, executeRecordOperations, saveRecord } from './records';
+import { log } from '../utils/logger';
 
 export type ChangesetOperationCallback = (changeset: Core.Changeset) => Promise<any>;
 
@@ -19,7 +20,7 @@ function buildChangesetAttributes(form: Core.Form, comment?: string) {
 }
 
 export async function fetchChangeset(client: Client, id: string) {
-  console.log('fetching changeset', id);
+  log.info('fetching changeset', id);
 
   return new Core.Changeset(await client.changesets.find(id));
 }
@@ -27,13 +28,14 @@ export async function fetchChangeset(client: Client, id: string) {
 export async function createChangeset(client: Client, form: Core.Form, comment?: string) {
   const json = await client.changesets.create(buildChangesetAttributes(form, comment));
 
-  console.log('created changeset', blue(json.id), green(comment));
+  log.info('created changeset', blue(json.id), green(comment));
 
   return new Core.Changeset(json);
 }
 
 export async function closeChangeset(client: Client, changeset: Core.Changeset) {
-  console.log('closing changeset', blue(changeset.id));
+  log.info('closing changeset', blue(changeset.id));
+
   return client.changesets.close(changeset.id);
 }
 
@@ -54,13 +56,13 @@ export async function revertChangeset(
   client: Client,
   changeset: Core.Changeset,
 ) {
-  console.log('reverting changeset', changeset.id);
+  log.info('reverting changeset', changeset.id);
 
   const form = await fetchForm(client, changeset._formID);
 
   const history = await client.records.history({ changeset_id: changeset.id });
 
-  console.log('found', history.objects.length, 'records');
+  log.info('found', history.objects.length, 'records');
 
   const operations = [];
 

@@ -4,6 +4,7 @@ import { red, green, blue } from './log';
 import { Context } from './api';
 
 import EXPRESSIONS from '../../resources/expressions.json';
+import { log } from '../utils/logger';
 
 const SCRIPT = `
   Object.assign($$runtime, global.runtimeVariables);
@@ -29,7 +30,7 @@ export async function shutdownSandbox() {
 }
 
 export async function updateCalculations(record: Core.Record, context: Context) {
-  console.log('updating calculations for record', record.id);
+  log.info('updating calculations for record', record.id);
 
   await updateCalculationsRecursive(record, record, record.formValues, context);
 }
@@ -79,7 +80,7 @@ export async function updateCalculationsRecursive(
       const currentValue = feature.formValues.get(element.key);
 
       if (!currentValue || !formValue.isEqual(currentValue.textValue)) {
-        console.log(
+        log.info(
           'record',
           blue(record.id),
           'updating calculation',

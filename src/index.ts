@@ -33,6 +33,11 @@ yargs(hideBin(process.argv))
     required: true,
     describe: 'API token',
   })
+  .option('logDir', {
+    required: true,
+    default: './logs',
+    describe: 'Log directory',
+  })
   .command(records)
   .command(forms)
   .command(query)

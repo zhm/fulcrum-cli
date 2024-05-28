@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import Client from '../api/client';
 import { blue } from './log';
+import { log } from '../utils/logger';
 
 export async function duplicateWorkflows(
   client: Client,
@@ -30,7 +31,7 @@ export async function duplicateWorkflows(
       active: false,
     };
 
-    console.log('creating workflow', blue(newWorkflow.name));
+    log.info('creating workflow', blue(newWorkflow.name));
 
     await client.workflows.create(newWorkflow);
   }
@@ -40,7 +41,7 @@ export async function deleteWorkflow(
   client: Client,
   id: string,
 ) {
-  console.log('deleting workflow', blue(id));
+  log.info('deleting workflow', blue(id));
 
   await client.workflows.delete(id);
 }

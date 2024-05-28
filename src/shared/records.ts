@@ -11,13 +11,14 @@ import {
 } from './attachments';
 import { shutdownSandbox, updateCalculations } from './calculations';
 import { fetchForm } from './forms';
+import { log } from '../utils/logger';
 
 export type RecordProcessor = (record: Core.Record) => Promise<any>;
 
 export type RecordOperationCallback = (record: Core.Record) => Promise<RecordOperation | null>;
 
 export async function fetchRecord(client: Client, id: string, form?: Core.Form) {
-  console.log('fetching record', id);
+  log.info('fetching record', id);
 
   const json = await client.records.find(id);
 
@@ -35,7 +36,7 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   let done = false;
 
   while (!done) {
-    console.log('fetching records page', blue(page));
+    log.info('fetching records page', blue(page));
 
     const result = await client.records.history({ ...params, page });
 
@@ -46,7 +47,7 @@ export async function fetchHistoryRecords(client: Client, params: any) {
     done = result.objects.length < perPage;
   }
 
-  console.log('fetched', blue(records.length), 'history record(s)');
+  log.info('fetched', blue(records.length), 'history record(s)');
 
   return records;
 }
@@ -63,7 +64,7 @@ export async function fetchRecords(
   let done = false;
 
   while (!done) {
-    console.log('fetching records page', blue(page));
+    log.info('fetching records page', blue(page));
 
     const result = await client.records.all({ ...{ form_id: form.id, ...params }, page });
 
@@ -74,7 +75,7 @@ export async function fetchRecords(
     done = result.objects.length < perPage;
   }
 
-  console.log('fetched', blue(records.length), 'record(s)');
+  log.info('fetched', blue(records.length), 'record(s)');
 
   return records;
 }
@@ -89,7 +90,7 @@ export async function fetchRecordsBySQL(
 
   const query = where ? `${select} WHERE ${where}` : select;
 
-  console.log('fetching records by sql', blue(query));
+  log.info('fetching records by sql', blue(query));
 
   const result = await client.query.run({ q: query });
 
@@ -101,7 +102,7 @@ export async function fetchRecordsBySQL(
     const record = await fetchRecord(client, id, form);
 
     if (record.projectID) {
-      console.log('fetching project', record.projectID);
+      log.info('fetching project', record.projectID);
 
       const project = await client.projects.find(record.projectID);
 
@@ -117,7 +118,7 @@ export async function fetchRecordsBySQL(
 export async function saveRecord(client: Client, record: Core.Record, changeset?: Core.Changeset) {
   record.changeset = changeset;
 
-  console.log(`${record.version ? 'updating' : 'creating'} record`, blue(record.id));
+  log.info(`${record.version ? 'updating' : 'creating'} record`, blue(record.id));
 
   const json = await client.records.create(record.toJSON());
 
@@ -142,7 +143,7 @@ export async function saveRecords(
 }
 
 export async function deleteRecord(client: Client, id: string, changeset?: Core.Changeset) {
-  console.log('deleting record', blue(id));
+  log.info('deleting record', blue(id));
 
   return client.records.delete(id, changeset.id);
 }
@@ -216,11 +217,11 @@ export default async function duplicateRecords(
   sql?: string,
   where?: string,
 ) {
-  console.log('fetching records from source form', blue(sourceForm.id));
+  log.info('fetching records from source form', blue(sourceForm.id));
 
   const records = await fetchRecordsBySQL(client, sourceForm, sql, where);
 
-  console.log('creating', blue(records.length), 'record(s)');
+  log.info('creating', blue(records.length), 'record(s)');
 
   await duplicateRecordsWithMedia(
     client,
@@ -252,7 +253,7 @@ export async function duplicateRecordsWithMedia(
     });
   }
 
-  console.log('duplicating', blue(operations.length), 'record(s)');
+  log.info('duplicating', blue(operations.length), 'record(s)');
 
   const copyMedia = async (record: Core.Record) => {
     await batch(record.formValues.mediaValues, async (item) => {

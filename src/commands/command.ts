@@ -1,7 +1,7 @@
 import {
   ArgumentsCamelCase, CommandBuilder, CommandModule,
 } from 'yargs';
-import withErrorHandling from '../shared/with-error-handling';
+import withErrorHandling from '../utils/with-error-handling';
 
 export interface CommandArguments {
   endpoint: string;

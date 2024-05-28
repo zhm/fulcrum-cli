@@ -1,11 +1,21 @@
+import path from 'path';
+import { Argv } from 'yargs';
+import { createLogger, log } from './logger';
+
 type CommandFunction = (...args: any[]) => Promise<void>;
 
+interface Args extends Argv {
+  logDir: string;
+}
+
 export default function withErrorHandling(fn: CommandFunction): CommandFunction {
-  return async (...args: any[]) => {
+  return async (yargs: Args) => {
     try {
-      await fn(...args);
+      createLogger(yargs.logDir, 'debug');
+
+      await fn(yargs);
     } catch (error) {
-      console.error('error', error.message);
+      log.info('error', error.message);
     }
   };
 }
