@@ -1,6 +1,5 @@
 import Core from 'fulcrum-core';
 import { SandboxCluster } from 'v8-sandbox';
-import { red, green, blue } from './log';
 import { Context } from './api';
 
 import EXPRESSIONS from '../../resources/expressions.json';
@@ -82,13 +81,13 @@ export async function updateCalculationsRecursive(
       if (!currentValue || !formValue.isEqual(currentValue.textValue)) {
         log.info(
           'record',
-          blue(record.id),
+          record.id,
           'updating calculation',
-          blue(element.dataName),
+          element.dataName,
           'from',
-          red(currentValue?.textValue ?? '[Blank]'),
+          currentValue?.textValue ?? '[Blank]',
           'to',
-          green(formValue.textValue),
+          formValue.textValue,
         );
 
         feature.formValues.set(element.key, formValue);

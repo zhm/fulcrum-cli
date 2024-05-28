@@ -2,7 +2,6 @@ import fs from 'fs';
 import { filesize } from 'filesize';
 import { fileFromPath } from 'formdata-node/file-from-path';
 import Client from '../api/client';
-import { green, blue, red } from './log';
 import { batch } from './api';
 import { log } from '../utils/logger';
 
@@ -16,7 +15,7 @@ export async function deleteAttachmentsByName(
   const existing = attachments.objects.filter((attachment) => attachment.name === name);
 
   await batch(existing, async (attachment) => {
-    log.info('deleting attachment', blue(name), green(attachment.id));
+    log.info('deleting attachment', name, attachment.id);
 
     return client.attachments.delete(attachment.id);
   });
@@ -36,7 +35,7 @@ export async function duplicateMedia(
 
     const newObject = await create(file, {});
 
-    log.info('created', type, blue(newObject.access_key));
+    log.info('created', type, newObject.access_key);
 
     return newObject;
   });
@@ -97,7 +96,7 @@ export async function createAttachment(
     },
   };
 
-  log.info('creating attachment', blue(name), red(filesize(attachment.file_size)));
+  log.info('creating attachment', name, filesize(attachment.file_size));
 
   return client.attachments.create(attachment, filePath);
 }
@@ -110,6 +109,8 @@ export async function duplicateReferenceFiles(
   const attachments = await client.attachments.all({ owner_type: 'form', form_id: sourceFormID });
 
   await batch(attachments.objects, async (attachment) => {
+    log.info('duplicating attachment', attachment.name, filesize(attachment.file_size));
+
     await client.withDownloadedFile({ url: attachment.url }, async (result) => {
       await createAttachment(client, destinationFormID, result.outputFilePath, attachment.name);
     });

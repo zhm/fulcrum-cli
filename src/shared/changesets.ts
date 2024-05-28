@@ -1,8 +1,7 @@
 import Core from 'fulcrum-core';
 import Client from '../api/client';
-import { green, blue } from './log';
 import { fetchForm } from './forms';
-import { deleteRecord, executeRecordOperations, saveRecord } from './records';
+import { executeRecordOperations } from './records';
 import { log } from '../utils/logger';
 
 export type ChangesetOperationCallback = (changeset: Core.Changeset) => Promise<any>;
@@ -28,13 +27,13 @@ export async function fetchChangeset(client: Client, id: string) {
 export async function createChangeset(client: Client, form: Core.Form, comment?: string) {
   const json = await client.changesets.create(buildChangesetAttributes(form, comment));
 
-  log.info('created changeset', blue(json.id), green(comment));
+  log.info('created changeset', json.id, comment);
 
   return new Core.Changeset(json);
 }
 
 export async function closeChangeset(client: Client, changeset: Core.Changeset) {
-  log.info('closing changeset', blue(changeset.id));
+  log.info('closing changeset', changeset.id);
 
   return client.changesets.close(changeset.id);
 }

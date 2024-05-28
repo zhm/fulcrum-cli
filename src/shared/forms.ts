@@ -1,7 +1,6 @@
 import Core from 'fulcrum-core';
 import { fileFromPath } from 'formdata-node/file-from-path';
 import Client from '../api/client';
-import { blue } from './log';
 import {
   duplicateRecordsWithMedia, executeRecordOperations, fetchHistoryRecords, fetchRecords,
 } from './records';
@@ -16,7 +15,7 @@ export async function fetchForm(client: Client, id: string) {
 }
 
 export async function deleteForm(client: Client, form: Core.Form) {
-  log.info('deleting form', blue(form.id));
+  log.info('deleting form', form.id);
 
   await client.forms.delete(form.id);
 }
@@ -51,7 +50,7 @@ export async function duplicateFormSchema(
 ) {
   const newForm = new Core.Form(await client.forms.create(form));
 
-  log.info('created new form', blue(newForm.name), blue(newForm.id));
+  log.info('created new form', newForm.name, newForm.id);
 
   return newForm;
 }
@@ -65,7 +64,7 @@ export async function restoreForm(
 
   const form = new Core.Form(await client.forms.create(deletedForm));
 
-  log.info('created new form', blue(form.name), blue(form.id));
+  log.info('created new form', form.name, form.id);
 
   const params = {
     deleted_form_id: deletedForm.id,
@@ -92,7 +91,7 @@ export async function restoreForm(
     });
   }
 
-  log.info('restoring', blue(operations.length), 'record(s)');
+  log.info('restoring', operations.length, 'record(s)');
 
   await executeRecordOperations({
     client, form, operations, comment: 'Restoring records',

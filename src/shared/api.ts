@@ -1,14 +1,9 @@
 import http from 'http';
 import axios from 'axios';
-import path from 'path';
-import fs from 'fs';
 import queue from 'async/queue';
 import Core from 'fulcrum-core';
-import { mkdirp } from 'mkdirp';
-import { randomUUID } from 'crypto';
 import Client from '../api/client';
-import { red } from './log';
-import { Logger, log } from '../utils/logger';
+import { log } from '../utils/logger';
 
 export interface Organization {
   id: string;
@@ -27,7 +22,7 @@ export async function batch(objects: any[], callback: BatchOperationCallback) {
     try {
       await callback(task);
     } catch (ex) {
-      log.error(red('error'), ex.message);
+      log.error(ex.message);
     }
   }, process.env.FULCRUM_BATCH_SIZE ?? 15);
 

@@ -3,7 +3,6 @@ import fs from 'fs';
 import { mkdirp } from 'mkdirp';
 import path from 'path';
 import Client, { FileDownloadResult } from '../api/client';
-import { blue } from './log';
 import { batch } from './api';
 import FileNamer from '../utils/file-namer';
 import { log } from '../utils/logger';
@@ -23,12 +22,12 @@ export async function runReport(
 
     const outputPath = path.join(directory, name);
 
-    log.info('saving report to', blue(outputPath));
+    log.info('saving report to', outputPath);
 
     return fs.promises.rename(result.outputFilePath, outputPath);
   };
 
-  log.info('running report for record', blue(record.id));
+  log.info('running report for record', record.id);
 
   await client.reports.generate(record.id, reportID, onDownloadFile);
 }

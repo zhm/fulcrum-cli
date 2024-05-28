@@ -1,6 +1,5 @@
 import Core from 'fulcrum-core';
 import Client from '../api/client';
-import { blue } from './log';
 import { Context, batch } from './api';
 import { withChangeset } from './changesets';
 import {
@@ -36,7 +35,7 @@ export async function fetchHistoryRecords(client: Client, params: any) {
   let done = false;
 
   while (!done) {
-    log.info('fetching records page', blue(page));
+    log.info('fetching records page', page);
 
     const result = await client.records.history({ ...params, page });
 
@@ -47,7 +46,7 @@ export async function fetchHistoryRecords(client: Client, params: any) {
     done = result.objects.length < perPage;
   }
 
-  log.info('fetched', blue(records.length), 'history record(s)');
+  log.info('fetched', records.length, 'history record(s)');
 
   return records;
 }
@@ -64,7 +63,7 @@ export async function fetchRecords(
   let done = false;
 
   while (!done) {
-    log.info('fetching records page', blue(page));
+    log.info('fetching records page', page);
 
     const result = await client.records.all({ ...{ form_id: form.id, ...params }, page });
 
@@ -75,7 +74,7 @@ export async function fetchRecords(
     done = result.objects.length < perPage;
   }
 
-  log.info('fetched', blue(records.length), 'record(s)');
+  log.info('fetched', records.length, 'record(s)');
 
   return records;
 }
@@ -90,7 +89,7 @@ export async function fetchRecordsBySQL(
 
   const query = where ? `${select} WHERE ${where}` : select;
 
-  log.info('fetching records by sql', blue(query));
+  log.info('fetching records by sql', query);
 
   const result = await client.query.run({ q: query });
 
@@ -118,7 +117,7 @@ export async function fetchRecordsBySQL(
 export async function saveRecord(client: Client, record: Core.Record, changeset?: Core.Changeset) {
   record.changeset = changeset;
 
-  log.info(`${record.version ? 'updating' : 'creating'} record`, blue(record.id));
+  log.info(`${record.version ? 'updating' : 'creating'} record`, record.id);
 
   const json = await client.records.create(record.toJSON());
 
@@ -143,7 +142,7 @@ export async function saveRecords(
 }
 
 export async function deleteRecord(client: Client, id: string, changeset?: Core.Changeset) {
-  log.info('deleting record', blue(id));
+  log.info('deleting record', id);
 
   return client.records.delete(id, changeset.id);
 }
@@ -217,11 +216,11 @@ export default async function duplicateRecords(
   sql?: string,
   where?: string,
 ) {
-  log.info('fetching records from source form', blue(sourceForm.id));
+  log.info('fetching records from source form', sourceForm.id);
 
   const records = await fetchRecordsBySQL(client, sourceForm, sql, where);
 
-  log.info('creating', blue(records.length), 'record(s)');
+  log.info('creating', records.length, 'record(s)');
 
   await duplicateRecordsWithMedia(
     client,
@@ -253,7 +252,7 @@ export async function duplicateRecordsWithMedia(
     });
   }
 
-  log.info('duplicating', blue(operations.length), 'record(s)');
+  log.info('duplicating', operations.length, 'record(s)');
 
   const copyMedia = async (record: Core.Record) => {
     await batch(record.formValues.mediaValues, async (item) => {
