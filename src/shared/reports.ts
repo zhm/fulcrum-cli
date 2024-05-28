@@ -5,7 +5,7 @@ import path from 'path';
 import Client, { FileDownloadResult } from '../api/client';
 import { blue } from './log';
 import { batch } from './api';
-import FileNamer from './file-namer';
+import FileNamer from '../utils/file-namer';
 
 export async function runReport(
   client: Client,

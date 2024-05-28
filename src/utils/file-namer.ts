@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import Namer from './namer';
+import Namer from '../shared/namer';
 
 const MAX_FILE_LENGTH = 200;
 
