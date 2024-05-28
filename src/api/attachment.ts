@@ -66,7 +66,7 @@ export default class Attachment extends MediaResource {
       },
     };
 
-    await this.client.execute(uploadOptions);
+    await this.client.executeRequest(uploadOptions);
 
     const finalizeOptions = {
       method: 'POST',

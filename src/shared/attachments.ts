@@ -3,7 +3,7 @@ import { filesize } from 'filesize';
 import { fileFromPath } from 'formdata-node/file-from-path';
 import Client from '../api/client';
 import { green, blue, red } from './log';
-import { batch, withDownloadedFile } from './api';
+import { batch } from './api';
 
 export async function deleteAttachmentsByName(
   client: Client,
@@ -22,6 +22,7 @@ export async function deleteAttachmentsByName(
 }
 
 export async function duplicateMedia(
+  client: Client,
   type: string,
   mediaID: string,
   find: (id: string) => Promise<any>,
@@ -29,8 +30,8 @@ export async function duplicateMedia(
 ) {
   const object = await find(mediaID);
 
-  return withDownloadedFile(object.original, async (filePath) => {
-    const file = await fileFromPath(filePath);
+  return client.withDownloadedFile({ url: object.original }, async (result) => {
+    const file = await fileFromPath(result.outputFilePath);
 
     const newObject = await create(file, {});
 
@@ -42,6 +43,7 @@ export async function duplicateMedia(
 
 export async function duplicatePhoto(client: Client, mediaID: string) {
   return duplicateMedia(
+    client,
     'photo',
     mediaID,
     (id) => client.photos.find(id),
@@ -51,6 +53,7 @@ export async function duplicatePhoto(client: Client, mediaID: string) {
 
 export async function duplicateAudio(client: Client, mediaID: string) {
   return duplicateMedia(
+    client,
     'audio',
     mediaID,
     (id) => client.audio.find(id),
@@ -60,6 +63,7 @@ export async function duplicateAudio(client: Client, mediaID: string) {
 
 export async function duplicateVideo(client: Client, mediaID: string) {
   return duplicateMedia(
+    client,
     'video',
     mediaID,
     (id) => client.videos.find(id),
@@ -69,6 +73,7 @@ export async function duplicateVideo(client: Client, mediaID: string) {
 
 export async function duplicateSignature(client: Client, mediaID: string) {
   return duplicateMedia(
+    client,
     'signature',
     mediaID,
     (id) => client.signatures.find(id),
@@ -104,8 +109,8 @@ export async function duplicateReferenceFiles(
   const attachments = await client.attachments.all({ owner_type: 'form', form_id: sourceFormID });
 
   await batch(attachments.objects, async (attachment) => {
-    await withDownloadedFile(attachment.url, async (filePath) => {
-      await createAttachment(client, destinationFormID, filePath, attachment.name);
+    await client.withDownloadedFile({ url: attachment.url }, async (result) => {
+      await createAttachment(client, destinationFormID, result.outputFilePath, attachment.name);
     });
   });
 }

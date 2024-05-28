@@ -1,5 +1,11 @@
 // @ts-nocheck
 
+import { mkdirp } from 'mkdirp';
+import { randomUUID } from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import contentDisposition from 'content-disposition';
 import Form from './form';
 import Record from './record';
 import ChoiceList from './choice-list';
@@ -21,6 +27,7 @@ import Permission from './permission';
 import Share from './share';
 import ReportTemplate from './report-template';
 import Workflow from './workflow';
+import Report from './report';
 import User from './user';
 import WorkflowExecution from './workflow_execution';
 
@@ -32,6 +39,14 @@ export interface Config {
 
 const BASE = '/api/v2';
 const UA = 'Fulcrum Web';
+
+export type FileDownloadResult = {
+  response: AxiosResponse;
+  responseFileName: string | null;
+  outputFilePath: string;
+};
+
+export type FileDownloadProcessor = (result: FileDownloadResult) => Promise<any>;
 
 export default class Client {
   config: Config;
@@ -110,26 +125,21 @@ export default class Client {
     }
 
     options.headers = {
-      'User-Agent': this.userAgent,
-      'X-Require-Media': 'false',
-      Accept: 'application/json',
+      ...this.apiHeaders,
+      ...options.headers,
     };
 
     if (!options.params) {
       options.params = {};
     }
 
-    if (this.token) {
-      options.headers['X-ApiToken'] = this.token;
-    }
-
-    return this.execute(options);
+    return this.executeRequest(options);
   }
 
-  execute(options) {
+  executeRequest(options: AxiosRequestConfig) {
     // console.log('<http>', options.method, options.url, options.params, options.headers, options.data);
     return new Promise((resolve, reject) => {
-      this.request(options)
+      axios(options)
         .then((response) => {
           resolve(response.data);
         })
@@ -143,6 +153,47 @@ export default class Client {
           reject(error);
         });
     });
+  }
+
+  async executeFileStreamRequest(requestOptions: AxiosRequestConfig, outputFileName: string) {
+    return new Promise(async (resolve, reject) => {
+      const destStream = fs.createWriteStream(outputFileName);
+
+      try {
+        const config = {
+          method: 'GET',
+          responseType: 'stream',
+          ...requestOptions,
+        };
+
+        const streamResponse = await axios(config)
+          .then((response) => new Promise((resolve, reject) => {
+            response.data.pipe(destStream);
+
+            destStream
+              .on('error', (err) => {
+                reject({ response: { statusText: err.message } }); // Use same shape as axios error
+              })
+              .on('close', () => {
+                resolve(response);
+              });
+          }));
+
+        resolve(streamResponse);
+      } catch (err) {
+        destStream.close();
+        reject(err);
+      }
+    });
+  }
+
+  get apiHeaders() {
+    return {
+      Accept: 'application/json',
+      'User-Agent': this.userAgent,
+      'X-Require-Media': 'false',
+      'X-ApiToken': this.token,
+    };
   }
 
   get(options) {
@@ -298,6 +349,13 @@ export default class Client {
     return this._permissions;
   }
 
+  get reports() {
+    if (!this._reports) {
+      this._reports = new Report(this);
+    }
+    return this._reports;
+  }
+
   get reportTemplates() {
     if (!this._reportTemplates) {
       this._reportTemplates = new ReportTemplate(this);
@@ -324,5 +382,46 @@ export default class Client {
       this._workflowExecutions = new WorkflowExecution(this);
     }
     return this._workflowExecutions;
+  }
+
+  async withDownloadedFile(
+    options: AxiosRequestConfig,
+    process: FileDownloadProcessor,
+  ): Promise<any> {
+    let result = null;
+
+    try {
+      result = await this.downloadFile(options);
+
+      return await process(result);
+    } finally {
+      if (result) {
+        try {
+          await fs.promises.unlink(result.outputFilePath);
+        } catch (err) {
+          // Ignore errors
+        }
+      }
+    }
+  }
+
+  async downloadFile(
+    options: AxiosRequestConfig,
+  ): FileDownloadResult {
+    await mkdirp('tmp');
+
+    const outputFilePath = path.join('tmp', randomUUID());
+
+    const response = await this.executeFileStreamRequest(options, outputFilePath);
+
+    let responseFileName = null;
+
+    if (response.headers['content-disposition']) {
+      const disposition = contentDisposition.parse(response.headers['content-disposition']);
+
+      responseFileName = disposition?.parameters?.filename;
+    }
+
+    return { response, responseFileName, outputFilePath };
   }
 }

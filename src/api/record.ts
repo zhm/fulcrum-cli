@@ -5,7 +5,6 @@ import Find from './actions/find';
 import Create from './actions/create';
 import Update from './actions/update';
 import Delete from './actions/delete';
-import History from './actions/history';
 import Resource from './resource';
 import Page from './page';
 import applyMixins from '../utils/mixin';

@@ -37,6 +37,7 @@
     "async": "^3.2.4",
     "axios": "^1.6.8",
     "chalk": "^5.3.0",
+    "content-disposition": "^0.5.4",
     "csv-stringify": "^6.5.0",
     "dotenv-defaults": "^5.0.2",
     "filesize": "^10.1.2",

@@ -2,7 +2,6 @@ import Core from 'fulcrum-core';
 import { fileFromPath } from 'formdata-node/file-from-path';
 import Client from '../api/client';
 import { blue } from './log';
-import { withDownloadedFile } from './api';
 import {
   duplicateRecordsWithMedia, executeRecordOperations, fetchHistoryRecords, fetchRecords,
 } from './records';
@@ -37,8 +36,8 @@ export async function duplicateFormImage(
   destinationFormID: string,
 ) {
   if (sourceForm.image) {
-    await withDownloadedFile(sourceForm.image, async (filePath) => {
-      const file = await fileFromPath(filePath);
+    await client.withDownloadedFile({ url: sourceForm.image }, async (result) => {
+      const file = await fileFromPath(result.outputFilePath);
 
       await client.forms.uploadImage(destinationFormID, file);
     });
