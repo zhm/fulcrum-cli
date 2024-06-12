@@ -4,9 +4,8 @@ dist/
 npm-debug.log
 test.db
 bench/*.db
-report.*
 output.log
 tmp/
 fulcrum
-reports
-logs
+reports/
+logs/
