@@ -1,6 +1,6 @@
 import path from 'path';
 import { Argv } from 'yargs';
-import { createLogger, log } from './logger';
+import { LogLevel, createLogger, log } from './logger';
 
 type CommandFunction = (...args: any[]) => Promise<void>;
 
@@ -11,11 +11,11 @@ interface Args extends Argv {
 export default function withErrorHandling(fn: CommandFunction): CommandFunction {
   return async (yargs: Args) => {
     try {
-      createLogger(yargs.logDir, 'debug');
+      createLogger(yargs.logDir, (process.env.LOG_LEVEL ?? 'log') as LogLevel);
 
       await fn(yargs);
     } catch (error) {
-      log.info('error', error);
+      log.debug('error', error);
     }
   };
 }

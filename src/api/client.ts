@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import contentDisposition from 'content-disposition';
+import retry, { AbortError } from 'p-retry';
 import Form from './form';
 import Record from './record';
 import ChoiceList from './choice-list';
@@ -134,7 +135,41 @@ export default class Client {
       options.params = {};
     }
 
-    return this.executeRequest(options);
+    return this.executeRequestWithRetries(options);
+  }
+
+  async executeRequestWithRetries(options: AxiosRequestConfig) {
+    const run = async () => {
+      try {
+        return await this.executeRequest(options);
+      } catch (err) {
+        const status = err.response?.status;
+
+        if (status === 401) {
+          log.error('Authentication error');
+          throw new AbortError(err);
+        }
+
+        if (status === 403) {
+          log.error('Not authorized');
+          throw new AbortError(err);
+        }
+
+        if (status === 404) {
+          log.error('Not found');
+          throw new AbortError(err);
+        }
+
+        if (status === 422) {
+          log.error('Unprocessable entity');
+          throw new AbortError(err);
+        }
+
+        throw err;
+      }
+    };
+
+    return retry(run, { retries: 5 });
   }
 
   executeRequest(options: AxiosRequestConfig) {
@@ -151,7 +186,7 @@ export default class Client {
     });
   }
 
-  async executeFileStreamRequest(requestOptions: AxiosRequestConfig, outputFileName: string) {
+  executeFileStreamRequest(requestOptions: AxiosRequestConfig, outputFileName: string) {
     return new Promise(async (resolve, reject) => {
       const destStream = fs.createWriteStream(outputFileName);
 

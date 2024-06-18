@@ -3,15 +3,15 @@ import fs from 'fs';
 import path from 'path';
 import { mkdirp } from 'mkdirp';
 
-const DEBUG = 'debug';
-const LOG = 'log';
-const WARN = 'warn';
-const ERROR = 'error';
-const INFO = 'info';
+export const DEBUG = 'debug';
+export const LOG = 'log';
+export const WARN = 'warn';
+export const ERROR = 'error';
+export const INFO = 'info';
 
-type LogLevel = 'debug' | 'log' | 'warn' | 'error' | 'info';
+export type LogLevel = 'debug' | 'log' | 'warn' | 'error' | 'info';
 
-const LEVELS = [
+export const LEVELS = [
   DEBUG,
   LOG,
   WARN,
@@ -98,7 +98,7 @@ export class Logger {
 
 let logger: Logger = null;
 
-export const createLogger = (logPath, level) => {
+export const createLogger = (logPath, level: LogLevel = LOG) => {
   logger = new Logger(logPath, level);
 };
 
