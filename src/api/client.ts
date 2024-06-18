@@ -187,7 +187,7 @@ export default class Client {
 
   logError(error: any, options: AxiosRequestConfig, response: AxiosResponse | null) {
     if (response) {
-      log.error({ context: 'http' }, error.message, options.url, error.response.status, error.response.data);
+      log.error({ context: 'http' }, error.message, options.url, error.response.status, JSON.stringify(error.response.data));
     } else {
       log.error({ context: 'http' }, error.message, options.url);
     }

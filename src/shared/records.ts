@@ -177,10 +177,10 @@ export async function restoreRecords(
   await batch(deletedRecordIDs, async (id) => {
     const history = await fetchHistoryRecords(client, { form_id: form.id, record_id: id });
 
-    const lastHistory = history.length ? history[history.length - 1] : null;
+    const deleted = history.find((r) => r.history_change_type === 'd');
 
-    if (lastHistory?.history_change_type === 'd') {
-      deletedRecords.push(lastHistory);
+    if (deleted) {
+      deletedRecords.push(deleted);
     } else {
       log.error('cannot restore record', id, 'record not deleted');
     }
