@@ -167,6 +167,48 @@ export interface RecordOperation {
   record?: Core.Record;
 }
 
+export async function restoreRecords(
+  client: Client,
+  form: Core.Form,
+  deletedRecordIDs: string[],
+) {
+  const deletedRecords = [];
+
+  await batch(deletedRecordIDs, async (id) => {
+    const history = await fetchHistoryRecords(client, { form_id: form.id, record_id: id });
+
+    const lastHistory = history.length ? history[history.length - 1] : null;
+
+    if (lastHistory?.history_change_type === 'd') {
+      deletedRecords.push(lastHistory);
+    } else {
+      log.error('cannot restore record', id, 'record not deleted');
+    }
+  });
+
+  const operations = [];
+
+  for (const attrs of deletedRecords) {
+    const newRecord = {
+      ...attrs,
+      id: null,
+      version: null,
+      form_id: form.id,
+    };
+
+    operations.push({
+      action: 'create',
+      record: new Core.Record(newRecord, form),
+    });
+  }
+
+  log.info('restoring', operations.length, 'record(s)');
+
+  await executeRecordOperations({
+    client, form, operations, comment: 'Restoring records',
+  });
+}
+
 export async function executeRecordOperations({
   client,
   form,

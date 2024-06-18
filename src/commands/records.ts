@@ -4,6 +4,7 @@ import deleteRecords from './records/delete';
 import updateRecords from './records/update';
 import duplicateRecords from './records/duplicate';
 import showRecord from './records/show';
+import restoreRecords from './records/restore';
 
 const command = 'records';
 
@@ -14,6 +15,7 @@ const builder: CommandBuilder = (yargs) => yargs
   .command(deleteRecords)
   .command(updateRecords)
   .command(duplicateRecords)
+  .command(restoreRecords)
   .demand(1, 'must provide a valid command')
   .strict(false);
 
