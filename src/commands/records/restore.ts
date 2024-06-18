@@ -44,7 +44,7 @@ export const handler: CommandHandler<Arguments> = async ({
 
   const form = await fetchForm(client, formID);
 
-  const ids = (await fs.promises.readFile(idFile, 'utf-8')).split('\n');
+  const ids = (await fs.promises.readFile(idFile, 'utf-8')).trim().split('\n').map((id) => id.trim());
 
   await restoreRecords(client, form, ids);
 
