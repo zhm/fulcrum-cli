@@ -15,7 +15,7 @@ export default function withErrorHandling(fn: CommandFunction): CommandFunction 
 
       await fn(yargs);
     } catch (error) {
-      log.info('error', error.message);
+      log.info('error', error);
     }
   };
 }

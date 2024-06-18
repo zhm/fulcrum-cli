@@ -109,20 +109,20 @@ export default class Client {
   constructor(options) {
     this.request = options.request;
     this.token = options.token;
-    this.base = options.base || BASE;
-    this.userAgent = options.userAgent || UA;
+    this.base = options.base ?? BASE;
+    this.userAgent = options.userAgent ?? UA;
     this.config = options.config;
   }
 
-  urlFromPath(path, base) {
-    return `${(base || this.base)}/${path}`;
+  urlFromPath(urlPath: string, prefix: string, base: string) {
+    return `${(base || this.base)}/${prefix}/${urlPath}`;
   }
 
   call(requestOptions) {
     const options = requestOptions || {};
 
     if (options.path) {
-      options.url = this.urlFromPath(options.path, options.base);
+      options.url = this.urlFromPath(options.path, 'api/v2', options.base);
     }
 
     options.headers = {
@@ -219,7 +219,7 @@ export default class Client {
   }
 
   url(path, base) {
-    return this.urlFromPath(path, base);
+    return this.urlFromPath(path, 'api/v2/', base);
   }
 
   get user() {
@@ -388,6 +388,10 @@ export default class Client {
       this._workflowExecutions = new WorkflowExecution(this);
     }
     return this._workflowExecutions;
+  }
+
+  fetchSync(): Promise<any> {
+    return this.get({ url: this.urlFromPath('sync', '/api/_private') });
   }
 
   async withDownloadedFile(

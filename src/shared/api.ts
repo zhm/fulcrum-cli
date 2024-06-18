@@ -37,7 +37,7 @@ export function createClient(endpoint: string, token: string) {
   });
 
   return new Client({
-    base: `${endpoint}/api/v2`,
+    base: endpoint,
     config: {
       query_url: endpoint,
     },
