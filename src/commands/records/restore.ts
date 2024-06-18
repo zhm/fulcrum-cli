@@ -47,23 +47,6 @@ export const handler: CommandHandler<Arguments> = async ({
   const ids = (await fs.promises.readFile(idFile, 'utf-8')).trim().split('\n').map((id) => id.trim());
 
   await restoreRecords(client, form, ids);
-
-  // const records = await fetchRecordsBySQL(client, form, sql, where);
-
-  // if (field && field.length !== value.length) {
-  //   log.error('Must pass the same number of fields and values');
-  //   return;
-  // }
-
-  // await updateRecordFields(
-  //   client,
-  //   form,
-  //   records,
-  //   context,
-  //   field ?? [],
-  //   value ?? [],
-  //   comment ?? 'Updating records',
-  // );
 };
 
 export default defineCommand({
