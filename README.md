@@ -20,6 +20,7 @@ Commands:
   fulcrum records delete                Delete records
   fulcrum records update                Update records
   fulcrum records duplicate             Duplicate records into new app
+  fulcrum records restore               Restore deleted records
   fulcrum forms delete                  Delete form
   fulcrum forms duplicate               Duplicate form and records
   fulcrum forms restore                 Restore form and records
