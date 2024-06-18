@@ -6,8 +6,8 @@
     "outDir": "dist",
     "strict": false,
     "lib": ["esnext"],
-    "module": "NodeNext",
-    "moduleResolution": "Bundler",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "esModuleInterop": true,
     "noImplicitAny": false
