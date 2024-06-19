@@ -146,12 +146,12 @@ export default class Client {
         const status = err.response?.status;
 
         if (status === 401) {
-          log.error('Authentication error');
+          log.error('Unauthorized');
           throw new AbortError(err);
         }
 
         if (status === 403) {
-          log.error('Not authorized');
+          log.error('Forbidden');
           throw new AbortError(err);
         }
 
