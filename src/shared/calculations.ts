@@ -71,6 +71,10 @@ export async function updateCalculationsRecursive(
     timeout: 2000,
   });
 
+  if (error) {
+    log.error('record', record.id, 'error evaluating calculations', error);
+  }
+
   for (const result of value) {
     if (result.type === 'calculation' && !result.error) {
       const element = record.form.get(result.key);
