@@ -10,6 +10,10 @@ export default class Create {
       method: 'POST',
       path: this.createAction,
       data: this.attributesForObject(object),
+      headers: {
+        'x-skipworkflows': true,
+        'x-skipwebhooks': true,
+      },
     };
 
     const json = await this.call(options);

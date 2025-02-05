@@ -6,6 +6,10 @@ export default class Update {
       method: 'PUT',
       path: this.member(id),
       data: this.attributesForObject(object),
+      headers: {
+        'x-skipworkflows': true,
+        'x-skipwebhooks': true,
+      },
     };
 
     const json = await this.call(options);
